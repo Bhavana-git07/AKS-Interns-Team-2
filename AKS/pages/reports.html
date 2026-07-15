@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reports — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ---- REPORTS PAGE SPECIFIC ---- */
+    .reports-layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; }
+    @media (max-width: 1100px) { .reports-layout { grid-template-columns: 1fr; } }
+
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    @media (max-width: 768px) { .charts-grid { grid-template-columns: 1fr; } }
+
+    /* SVG Donut Chart */
+    .donut-container { display: flex; align-items: center; justify-content: center; gap: 24px; padding: 14px 0; }
+    .donut-svg { transform: rotate(-90deg); }
+    .donut-ring { fill: none; stroke: var(--clr-border); stroke-width: 14; }
+    .donut-segment-satisfied { fill: none; stroke: var(--clr-accent); stroke-width: 14; stroke-dasharray: 251.2; stroke-dashoffset: 62.8; transition: stroke-dashoffset 0.6s ease; }
+    .donut-segment-gap { fill: none; stroke: var(--clr-danger); stroke-width: 14; stroke-dasharray: 251.2; stroke-dashoffset: 188.4; transition: stroke-dashoffset 0.6s ease; }
+    
+    .chart-legend { display: flex; flex-direction: column; gap: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* SVG Bar Chart */
+    .bar-chart-container { display: flex; flex-direction: column; gap: 16px; padding: 10px 0; }
+    .bar-chart-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .bar-label { font-size: 0.8rem; font-weight: 600; width: 100px; }
+    .bar-track { flex: 1; height: 12px; background: var(--clr-border); border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
+    .bar-val { font-size: 0.8rem; font-weight: 700; width: 40px; text-align: right; }
+
+    /* Report Generation cards */
+    .report-card {
+      background: var(--clr-surface-2); border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md); padding: 16px; margin-bottom: 14px;
+      display: flex; flex-direction: column; gap: 10px; transition: border-color var(--transition);
+    }
+    .report-card:hover { border-color: var(--clr-accent); }
+    .report-card__header { display: flex; align-items: center; gap: 12px; }
+    .report-card__icon {
+      width: 38px; height: 38px; border-radius: var(--radius-sm);
+      background: rgba(79, 142, 247, 0.12); color: var(--clr-blue);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .report-card__icon svg { width: 18px; height: 18px; }
+    .report-card__title { font-family: var(--font-display); font-size: 0.9rem; font-weight: 600; }
+    .report-card__desc { font-size: 0.76rem; color: var(--clr-muted); line-height: 1.5; }
+
+    /* compile log */
+    .compile-log-item { display: flex; gap: 10px; font-size: 0.78rem; color: var(--clr-muted); padding: 3px 0; align-items: center; }
+    .compile-log-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .compile-log-item.active { color: var(--clr-text); font-weight: 600; }
+    .compile-log-item.completed { color: var(--clr-accent); }
+    .compile-log-item.completed svg { color: var(--clr-accent); }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div><div class="sidebar__brand-text">ComplianceAudit</div><div class="sidebar__brand-sub">Readiness Platform</div></div>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__label">Main</div>
+        <a href="../dashboard.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="companies.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Companies
+        </a>
+        <a href="users.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Users
+        </a>
+        <a href="upload-documents.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Documents
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Compliance</div>
+        <a href="assessment.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+          Assessments
+        </a>
+        <a href="gap-analysis.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Gap Analysis
+        </a>
+        <a href="control-mapping.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Control Mapping
+        </a>
+        <a href="reports.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          Reports
+        </a>
+        <a href="ai-assistant.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+          AI Assistant
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Security</div>
+        <a href="audit-trail.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Audit Trail
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar">AD</div>
+        <div class="sidebar__user-info"><div class="sidebar__user-name">Admin User</div><div class="sidebar__user-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar__breadcrumb">
+        <a href="../dashboard.html" style="color:var(--clr-muted);text-decoration:none">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Reports</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-header">
+        <div class="section-header__text">
+          <h2>Compliance &amp; Gap Reports</h2>
+          <p>Generate readiness ledgers, track metrics, and export audit data</p>
+        </div>
+      </div>
+
+      <!-- Company Switcher -->
+      <div class="card" style="margin-bottom:20px;padding:16px 20px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <label class="form-label" style="margin-bottom:0">Active Assessment</label>
+          <select class="form-control" id="reportCompanySelect" style="max-width:320px" onchange="switchReportData(this.value)">
+            <option value="">Select Assessment</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="reports-layout">
+        <!-- Left Column: Dashboards & Charts -->
+        <div>
+          <!-- Stats Grid -->
+          <div class="stat-grid" style="margin-bottom:20px">
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="stat-card__value" id="statReadiness">0%</div>
+              <div class="stat-card__label">Audit Readiness</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="stat-card__value" id="statMapped">0</div>
+              <div class="stat-card__label">Satisfied Controls</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card__icon stat-card__icon--warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+              <div class="stat-card__value" id="statGaps">0</div>
+              <div class="stat-card__label">Identified Gaps</div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="charts-grid">
+            <!-- Donut Chart Card -->
+            <div class="card">
+              <div class="card__header"><div class="card__title">Mapping Breakdown</div></div>
+              <div class="donut-container">
+                <svg width="100" height="100" class="donut-svg">
+                  <circle cx="50" cy="50" r="40" class="donut-ring"/>
+                  <!-- satisfied (0%) -->
+                  <circle cx="50" cy="50" r="40" class="donut-segment-satisfied" id="donutSatisfied" style="stroke-dasharray: 0 251.2" />
+                  <!-- gaps (0%) -->
+                  <circle cx="50" cy="50" r="40" class="donut-segment-gap" id="donutGap" style="stroke-dasharray: 0 251.2" />
+                </svg>
+                <div class="chart-legend">
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--clr-accent)"></div><span id="labelSatisfied">Satisfied: 0 (0%)</span></div>
+                  <div class="legend-item"><div class="legend-dot" style="background:var(--clr-danger)"></div><span id="labelGaps">Gaps: 0 (0%)</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bar Chart Card -->
+            <div class="card">
+              <div class="card__header"><div class="card__title">Framework Readiness Comparison</div></div>
+              <div class="bar-chart-container">
+                <!-- Bar 1 -->
+                <div class="bar-chart-row">
+                  <span class="bar-label">PayNet TPA</span>
+                  <div class="bar-track"><div class="bar-fill" id="bar1" style="width:0%;background:var(--clr-accent)"></div></div>
+                  <span class="bar-val" id="barVal1">0%</span>
+                </div>
+                <!-- Bar 2 -->
+                <div class="bar-chart-row">
+                  <span class="bar-label">BNM RMiT</span>
+                  <div class="bar-track"><div class="bar-fill" id="bar2" style="width:0%;background:var(--clr-blue)"></div></div>
+                  <span class="bar-val" id="barVal2">0%</span>
+                </div>
+                <!-- Bar 3 -->
+                <div class="bar-chart-row">
+                  <span class="bar-label">MAS TRM</span>
+                  <div class="bar-track"><div class="bar-fill" id="bar3" style="width:0%;background:var(--clr-warn)"></div></div>
+                  <span class="bar-val" id="barVal3">0%</span>
+                </div>
+                <!-- Bar 4 -->
+                <div class="bar-chart-row">
+                  <span class="bar-label">NACSA NC-II</span>
+                  <div class="bar-track"><div class="bar-fill" id="bar4" style="width:0%;background:#9F7AEA"></div></div>
+                  <span class="bar-val" id="barVal4">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Export Reports Panel -->
+        <div>
+          <div class="card">
+            <div class="card__header"><div class="card__title">Generate Export Packages</div></div>
+            <div style="padding:4px 0">
+              
+              <!-- Report Card 1 -->
+              <div class="report-card">
+                <div class="report-card__header">
+                  <div class="report-card__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+                  <span class="report-card__title">Audit Readiness Report</span>
+                </div>
+                <div class="report-card__desc">Includes satisfied control metrics, evidence associations, and auditor sign-off states.</div>
+                <button class="btn btn-secondary btn-sm" onclick="compileReport('Audit Readiness Report')">Generate PDF</button>
+              </div>
+
+              <!-- Report Card 2 -->
+              <div class="report-card">
+                <div class="report-card__header">
+                  <div class="report-card__icon" style="color:var(--clr-warn);background:rgba(247,178,79,0.12)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+                  <span class="report-card__title">Detailed Overlap &amp; Gap Analysis</span>
+                </div>
+                <div class="report-card__desc">Clause-by-clause comparison between source and target framework requirements.</div>
+                <button class="btn btn-secondary btn-sm" onclick="compileReport('Overlap & Gap Analysis')">Generate PDF</button>
+              </div>
+
+              <!-- Report Card 3 -->
+              <div class="report-card">
+                <div class="report-card__header">
+                  <div class="report-card__icon" style="color:var(--clr-accent);background:var(--clr-accent-dim)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>
+                  <span class="report-card__title">Evidence Mapping Ledger</span>
+                </div>
+                <div class="report-card__desc">Complete mapping database table containing evidence file hashes and overlap links.</div>
+                <button class="btn btn-secondary btn-sm" onclick="compileReport('Evidence Mapping Ledger')">Export Excel (XLSX)</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REPORT COMPILES PROGRESS MODAL -->
+<div class="modal-overlay" id="compileModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal__header">
+      <div class="modal__title" id="compileModalTitle">Compiling Report...</div>
+    </div>
+    <div class="modal__body" style="text-align:center;padding:28px 24px">
+      <!-- spinner -->
+      <div style="display:inline-block;width:40px;height:40px;border:3px solid var(--clr-border);border-top-color:var(--clr-accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:18px"></div>
+      
+      <!-- progress bar -->
+      <div class="progress-bar-container" style="height:4px;background:var(--clr-border);border-radius:2px;overflow:hidden;margin-bottom:18px">
+        <div class="progress-bar-fill" id="compileBarFill" style="height:100%;width:0%;background:var(--clr-accent);transition:width 0.1s linear"></div>
+      </div>
+
+      <!-- log outputs -->
+      <div style="background:var(--clr-bg);border:1px solid var(--clr-border);border-radius:var(--radius-sm);padding:10px;text-align:left;height:100px;overflow-y:auto" id="compileConsole">
+        <div class="compile-log-item active" id="cLog1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Formatting report document structures...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+<div class="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+  const fwNameMap = {
+    1: 'PayNet TPA',
+    2: 'BNM RMiT',
+    3: 'MAS TRM',
+    4: 'NACSA NC-II'
+  };
+
+  let assessmentsList = [];
+  let currentAssessmentId = null;
+
+  function loadAssessments() {
+    fetch('../backend/api/assessment_list.php')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          assessmentsList = res.data;
+          
+          const select = document.getElementById('reportCompanySelect');
+          select.innerHTML = '';
+          
+          if (assessmentsList.length === 0) {
+            select.innerHTML = '<option value="">No assessments available</option>';
+            return;
+          }
+
+          const companies = [];
+          const companyMap = new Map();
+          assessmentsList.forEach(a => {
+            if (!companyMap.has(a.company_id)) {
+              companyMap.set(a.company_id, true);
+              companies.push({ id: a.company_id, name: a.company_name });
+            }
+          });
+
+          companies.forEach(c => {
+            select.innerHTML += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
+          });
+
+          if (companies.length > 0) {
+            switchReportData(companies[0].id);
+          }
+        }
+      });
+  }
+
+  function switchReportData(companyId) {
+    if (!companyId) {
+      currentAssessmentId = null;
+      document.getElementById('statReadiness').textContent = '0%';
+      document.getElementById('statMapped').textContent = '0';
+      document.getElementById('statGaps').textContent = '0';
+
+      const satisfiedRing = document.getElementById('donutSatisfied');
+      const gapRing = document.getElementById('donutGap');
+      if (satisfiedRing && gapRing) {
+        satisfiedRing.style.strokeDashoffset = 251.2;
+        gapRing.style.strokeDashoffset = 251.2;
+      }
+      document.getElementById('labelSatisfied').textContent = 'Satisfied: 0 (0%)';
+      document.getElementById('labelGaps').textContent = 'Gaps: 0 (0%)';
+
+      for (let i = 1; i <= 4; i++) {
+        const bar = document.getElementById(`bar${i}`);
+        const barVal = document.getElementById(`barVal${i}`);
+        if (bar && barVal) {
+          bar.style.width = '0%';
+          barVal.textContent = '0%';
+        }
+      }
+      return;
+    }
+
+    const companyAssessments = assessmentsList.filter(a => a.company_id == companyId);
+    const activeA = companyAssessments[0];
+    if (!activeA) return;
+
+    currentAssessmentId = activeA.assessment_id;
+
+    fetch(`../backend/api/gap_analysis.php?assessment_id=${activeA.assessment_id}`)
+      .then(r => r.json())
+      .then(data => {
+        const total = data.length;
+        const matched = data.filter(c => c.status === 'Matched').length;
+        const gaps = total - matched;
+        const pct = Math.round(activeA.compliance_percentage || 0);
+
+        document.getElementById('statReadiness').textContent = pct + '%';
+        document.getElementById('statMapped').textContent = matched;
+        document.getElementById('statGaps').textContent = gaps;
+
+        const satisfiedRing = document.getElementById('donutSatisfied');
+        const gapRing = document.getElementById('donutGap');
+
+        const circumference = 251.2;
+        const satisfiedLen = circumference * (pct / 100);
+        const gapLen = circumference * ((100 - pct) / 100);
+
+        satisfiedRing.style.strokeDasharray = `${satisfiedLen} ${circumference}`;
+        satisfiedRing.style.strokeDashoffset = `0`;
+
+        gapRing.style.strokeDasharray = `${gapLen} ${circumference}`;
+        gapRing.style.strokeDashoffset = `-${satisfiedLen}`;
+
+        document.getElementById('labelSatisfied').textContent = `Satisfied: ${matched} (${pct}%)`;
+        document.getElementById('labelGaps').textContent = `Gaps: ${gaps} (${100 - pct}%)`;
+
+        const fwComp = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        if (activeA) {
+          fwComp[activeA.current_framework_id] = 100;
+        }
+        companyAssessments.forEach(a => {
+          fwComp[a.target_framework_id] = Math.round(a.compliance_percentage || 0);
+        });
+
+        for (let i = 1; i <= 4; i++) {
+          const val = fwComp[i];
+          const bar = document.getElementById(`bar${i}`);
+          const barVal = document.getElementById(`barVal${i}`);
+          if (bar && barVal) {
+            bar.style.width = val + '%';
+            barVal.textContent = val + '%';
+          }
+        }
+      });
+  }
+
+  function compileReport(name) {
+    if (!currentAssessmentId) {
+      showToast('No active assessment loaded.', 'error');
+      return;
+    }
+
+    if (name === 'Evidence Mapping Ledger') {
+      exportLedgerCSV();
+      return;
+    }
+
+    let type = 'readiness';
+    if (name.includes('Gap') || name.includes('Overlap')) {
+      type = 'gap';
+    }
+    const url = `../backend/api/generate_report.php?assessment_id=${currentAssessmentId}&report_type=${type}`;
+    window.open(url, '_blank');
+    showToast(`${name} PDF compilation started successfully!`, 'success');
+  }
+
+  function exportLedgerCSV() {
+    if (!currentAssessmentId) return;
+
+    fetch(`../backend/api/gap_analysis.php?assessment_id=${currentAssessmentId}`)
+      .then(r => r.json())
+      .then(data => {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Control Name,Source Clause,Target Clause,Status,Suggested Action\n";
+
+        data.forEach(c => {
+          const isMatched = c.status === 'Matched';
+          const srcClause = c.source_control_code || "— None";
+          const tgtClause = c.control_code;
+          const statusText = isMatched ? "Direct Overlap" : "Unsatisfied Gap";
+          const actionText = isMatched ? "Reuse policy/diagram evidence" : "Provide compliance evidence manually";
+
+          const row = `"${c.control_name.replace(/"/g, '""')}","${srcClause}","${tgtClause}","${statusText}","${actionText}"`;
+          csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Evidence_Mapping_Ledger_${currentAssessmentId}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast('Evidence Ledger exported successfully as CSV!', 'success');
+      })
+      .catch(err => {
+        showToast('Failed to export ledger.', 'error');
+      });
+  }
+
+  window.addEventListener('load', loadAssessments);
+</script>
+</body>
+</html>

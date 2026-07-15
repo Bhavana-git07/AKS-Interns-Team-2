@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--clr-bg); }
+
+    /* ---- BACKGROUND GRID ---- */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(var(--clr-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+    /* ---- GLOW ---- */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(223, 171, 108, 0.12) 0%, transparent 70%);
+      top: -100px; left: -100px;
+      pointer-events: none;
+    }
+
+    .login-wrap {
+      position: relative; z-index: 1;
+      width: min(440px, 95vw);
+      animation: fadeUp 0.5s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .login-brand__logo {
+      width: 52px; height: 52px;
+      background: var(--clr-accent);
+      border-radius: var(--radius-md);
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+      box-shadow: 0 0 32px rgba(223, 171, 108, 0.3);
+    }
+    .login-brand__logo svg { width: 26px; height: 26px; color: #141416; }
+    .login-brand h1 {
+      font-family: var(--font-display);
+      font-size: 1.4rem; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .login-brand p { font-size: 0.82rem; color: var(--clr-muted); }
+
+    .login-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .login-card h2 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .login-card .lead { font-size: 0.82rem; color: var(--clr-muted); margin-bottom: 24px; }
+
+    /* password toggle */
+    #togglePwd { width: 16px; height: 16px; color: var(--clr-muted); }
+
+    .pw-strength { margin-top: 8px; }
+    .pw-strength-bar-track {
+      height: 3px;
+      background: var(--clr-border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .pw-strength-bar { height: 100%; width: 0; border-radius: 2px; transition: width 0.3s, background 0.3s; }
+    .pw-strength-label { font-size: 0.7rem; margin-top: 4px; }
+
+    .login-btn { width: 100%; justify-content: center; padding: 12px; font-size: 0.95rem; margin-top: 4px; }
+
+    .login-footer { text-align: center; margin-top: 20px; font-size: 0.8rem; color: var(--clr-muted); }
+    .login-footer a { color: var(--clr-accent); }
+
+    .role-selector { display: flex; gap: 8px; margin-bottom: 20px; }
+    .role-btn {
+      flex: 1; padding: 10px 8px; text-align: center;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; color: var(--clr-muted);
+      background: var(--clr-surface-2);
+      transition: all var(--transition);
+    }
+    .role-btn.selected {
+      border-color: var(--clr-accent);
+      color: var(--clr-accent);
+      background: var(--clr-accent-dim);
+    }
+    .role-btn .role-icon { font-size: 1.2rem; display: block; margin-bottom: 4px; }
+
+    /* first-login warning */
+    #firstLoginNotice {
+      display: none;
+      background: rgba(233, 196, 106, 0.08);
+      border: 1px solid rgba(233, 196, 106, 0.25);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      color: var(--clr-warn);
+      margin-bottom: 16px;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    #firstLoginNotice svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
+    #firstLoginNotice.show { display: flex; }
+
+    .form-group-inline { display: flex; align-items: center; justify-content: space-between; }
+    .remember-wrap { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; cursor: pointer; }
+    .remember-wrap input[type="checkbox"] { accent-color: var(--clr-accent); width: 14px; height: 14px; }
+    .forgot-link { font-size: 0.8rem; color: var(--clr-accent); }
+  </style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+  <!-- Brand -->
+  <div class="login-brand">
+    <div class="login-brand__logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/>
+        <path d="M9 12l2 2 4-4"/>
+      </svg>
+    </div>
+    <h1>ComplianceAudit</h1>
+    <p>Audit Readiness &amp; Control Mapping Platform</p>
+  </div>
+
+  <!-- Card -->
+  <div class="login-card">
+    <h2>Welcome back</h2>
+    <p class="lead">Sign in to your account to continue.</p>
+
+
+
+
+
+    <!-- Form -->
+    <form id="loginForm" novalidate>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email address <span class="req">*</span></label>
+        <div class="input-icon-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+          </svg>
+          <input type="email" id="email" name="email" class="form-control" placeholder="you@company.com" required autocomplete="email">
+        </div>
+        <div class="form-error">Please enter a valid email address.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password <span class="req">*</span></label>
+        <div class="input-icon-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+          <button type="button" class="input-icon-right" onclick="togglePassword()">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="form-error">Please enter your password.</div>
+      </div>
+
+      <div class="form-group-inline" style="margin-bottom: 20px;">
+        <label class="remember-wrap">
+          <input type="checkbox" id="remember"> Keep me signed in
+        </label>
+        <a href="#" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn" id="loginBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Sign in
+      </button>
+
+    </form>
+
+    <!-- OTP verification form -->
+    <form id="otpForm" style="display:none" novalidate>
+      <div class="alert alert-info" style="margin-bottom:20px; font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--clr-accent)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          An OTP has been sent to <strong id="otpEmailLabel">your email</strong>.
+        </div>
+        <div style="font-size:0.75rem; color:var(--clr-muted); margin-top:2px;">
+          (Simulated delivery logged to <code style="color:var(--clr-accent); font-weight:600;">otp_output.txt</code>)
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="otpCode">6-Digit Verification Code <span class="req">*</span></label>
+        <div class="input-icon-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <input type="text" id="otpCode" name="otpCode" class="form-control" placeholder="123456" required autocomplete="off" maxlength="6" style="letter-spacing: 0.25rem; font-size: 1.1rem; font-weight: 700; text-align: center;">
+        </div>
+        <div class="form-error">Please enter the 6-digit verification code.</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; font-size:0.8rem;">
+        <span style="color:var(--clr-muted)">Expires in: <strong id="otpTimer" style="color:var(--clr-warn)">05:00</strong></span>
+        <a href="#" id="resendOtpBtn" style="color:var(--clr-accent); text-decoration:none; font-weight:600;" onclick="resendOtp(event)">Resend Code</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn" id="verifyOtpBtn">
+        Verify &amp; Log In
+      </button>
+
+      <button type="button" class="btn btn-secondary login-btn" style="margin-top:10px;" onclick="cancelOtp()">
+        Back to Login
+      </button>
+    </form>
+
+    <!-- Google Authenticator verification form -->
+    <form id="googleMfaForm" style="display:none" novalidate>
+      <div class="alert alert-info" style="margin-bottom:20px; font-size:0.8rem; display:flex; flex-direction:column; gap:6px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" style="color:var(--clr-accent)"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Google Authenticator MFA is active on your account.
+        </div>
+        <p style="font-size:0.75rem; color:var(--clr-muted); margin-top:2px;">
+          Please enter the 6-digit code shown in your Authenticator app.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="googleMfaCode">MFA Authenticator Code <span class="req">*</span></label>
+        <div class="input-icon-wrap">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          <input type="text" id="googleMfaCode" name="googleMfaCode" class="form-control" placeholder="000000" required autocomplete="off" maxlength="6" style="letter-spacing: 0.25rem; font-size: 1.1rem; font-weight: 700; text-align: center;">
+        </div>
+        <div class="form-error">Please enter the 6-digit verification code.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn" id="verifyGoogleMfaBtn">
+        Verify &amp; Log In
+      </button>
+
+      <button type="button" class="btn btn-secondary login-btn" style="margin-top:10px;" onclick="cancelGoogleMfa()">
+        Back to Login
+      </button>
+    </form>
+  </div>
+
+  <div class="login-footer">
+    Having trouble? <a href="mailto:support@complianceaudit.com">Contact support</a>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container"></div>
+
+<script src="js/app.js"></script>
+<script>
+  let currentRole = 'admin';
+
+  function togglePassword() {
+    const input = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.innerHTML = `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+    } else {
+      input.type = 'password';
+      icon.innerHTML = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>`;
+    }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    let valid = true;
+
+    // Email validation
+    const emailGroup = document.getElementById('email').closest('.form-group');
+    const emailErr = emailGroup.querySelector('.form-error');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('email').classList.add('error');
+      emailErr.classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('email').classList.remove('error');
+      emailErr.classList.remove('show');
+    }
+
+    // Password validation
+    const pwGroup = document.getElementById('password').closest('.form-group');
+    const pwErr = pwGroup.querySelector('.form-error');
+    if (!password) {
+      document.getElementById('password').classList.add('error');
+      pwErr.classList.add('show');
+      valid = false;
+    } else {
+      document.getElementById('password').classList.remove('error');
+      pwErr.classList.remove('show');
+    }
+
+    if (!valid) return;
+
+    const btn = document.getElementById('loginBtn');
+    const btnHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Signing in...`;
+
+    const endpoint = currentRole === 'admin' ? 'backend/api/login.php' : 'backend/api/user_login.php';
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success && res.data.otp_required) {
+        // Show OTP verification form, hide login form
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('otpForm').style.display = 'block';
+        document.getElementById('otpEmailLabel').textContent = res.data.email;
+        document.getElementById('otpCode').value = '';
+        
+        showToast('Verification code has been sent to your email address.', 'success');
+        startOtpCountdown();
+        
+        btn.disabled = false;
+        btn.innerHTML = btnHtml;
+      } else if (res.success) {
+        const userObj = {
+          id: res.data.admin_id || res.data.user_id,
+          name: res.data.name || res.data.full_name,
+          email: res.data.email,
+          role: res.data.role || 'admin',
+          first_login: res.data.first_login
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userObj));
+        showToast('Login successful!', 'success');
+        setTimeout(() => {
+          if (userObj.first_login) {
+            window.location.href = 'pages/change-password.html';
+          } else {
+            window.location.href = 'dashboard.html';
+          }
+        }, 1000);
+      } else {
+        showToast(res.message || 'Invalid email or password.', 'error');
+        btn.disabled = false;
+        btn.innerHTML = btnHtml;
+      }
+    })
+    .catch(err => {
+      showToast('Login failed. Please check connection.', 'error');
+      btn.disabled = false;
+      btn.innerHTML = btnHtml;
+    });
+  });
+
+  let otpInterval = null;
+  let otpTimeRemaining = 300; // 5 minutes
+
+  function startOtpCountdown() {
+    clearInterval(otpInterval);
+    otpTimeRemaining = 300;
+    
+    const timerEl = document.getElementById('otpTimer');
+    const resendBtn = document.getElementById('resendOtpBtn');
+    
+    resendBtn.style.pointerEvents = 'none';
+    resendBtn.style.opacity = '0.5';
+    
+    function updateTimer() {
+      const minutes = Math.floor(otpTimeRemaining / 60);
+      const seconds = otpTimeRemaining % 60;
+      timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (otpTimeRemaining <= 0) {
+        clearInterval(otpInterval);
+        timerEl.textContent = '00:00';
+        resendBtn.style.pointerEvents = 'auto';
+        resendBtn.style.opacity = '1';
+        showToast('Verification code expired. You can request a new code.', 'info');
+      }
+      otpTimeRemaining--;
+    }
+    
+    updateTimer();
+    otpInterval = setInterval(updateTimer, 1000);
+  }
+
+  function cancelOtp() {
+    clearInterval(otpInterval);
+    document.getElementById('otpForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Sign in`;
+  }
+
+  function resendOtp(e) {
+    if (e) e.preventDefault();
+    
+    const resendBtn = document.getElementById('resendOtpBtn');
+    resendBtn.style.pointerEvents = 'none';
+    resendBtn.style.opacity = '0.5';
+    
+    fetch('backend/api/resend_otp.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        showToast('A new verification code has been sent to your email address.', 'success');
+        startOtpCountdown();
+      } else {
+        showToast(res.message || 'Failed to resend code.', 'error');
+        resendBtn.style.pointerEvents = 'auto';
+        resendBtn.style.opacity = '1';
+      }
+    })
+    .catch(err => {
+      showToast('Connection error. Please try again.', 'error');
+      resendBtn.style.pointerEvents = 'auto';
+      resendBtn.style.opacity = '1';
+    });
+  }
+
+  document.getElementById('otpForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const otp = document.getElementById('otpCode').value.trim();
+    
+    if (!otp || otp.length !== 6 || isNaN(otp)) {
+      document.getElementById('otpCode').classList.add('error');
+      document.getElementById('otpCode').closest('.form-group').querySelector('.form-error').classList.add('show');
+      return;
+    } else {
+      document.getElementById('otpCode').classList.remove('error');
+      document.getElementById('otpCode').closest('.form-group').querySelector('.form-error').classList.remove('show');
+    }
+    
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying...';
+    
+    fetch('backend/api/verify_otp.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ otp })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success && res.data.google_mfa_required) {
+        clearInterval(otpInterval);
+        document.getElementById('otpForm').style.display = 'none';
+        document.getElementById('googleMfaForm').style.display = 'block';
+        document.getElementById('googleMfaCode').value = '';
+        document.getElementById('googleMfaCode').focus();
+        showToast('Please verify using your Google Authenticator App.', 'info');
+      } else if (res.success) {
+        const userObj = {
+          id: res.data.user_id,
+          name: res.data.full_name,
+          email: res.data.email,
+          role: res.data.role,
+          first_login: res.data.first_login
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userObj));
+        
+        fetchCsrfToken().then(() => {
+          showToast('Login successful!', 'success');
+          setTimeout(() => {
+            if (userObj.first_login) {
+              window.location.href = 'pages/change-password.html';
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
+        });
+      } else {
+        showToast(res.message || 'Invalid verification code.', 'error');
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify & Log In';
+        
+        if (res.message.includes('expired') || res.message.includes('attempts')) {
+          setTimeout(cancelOtp, 1500);
+        }
+      }
+    })
+    .catch(err => {
+      showToast('Connection error. Please try again.', 'error');
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = 'Verify & Log In';
+    });
+  });
+
+  function cancelGoogleMfa() {
+    document.getElementById('googleMfaForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+    
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = false;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> Sign in`;
+  }
+
+  document.getElementById('googleMfaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const code = document.getElementById('googleMfaCode').value.trim();
+    
+    if (!code || code.length !== 6 || isNaN(code)) {
+      document.getElementById('googleMfaCode').classList.add('error');
+      document.getElementById('googleMfaCode').closest('.form-group').querySelector('.form-error').classList.add('show');
+      return;
+    } else {
+      document.getElementById('googleMfaCode').classList.remove('error');
+      document.getElementById('googleMfaCode').closest('.form-group').querySelector('.form-error').classList.remove('show');
+    }
+    
+    const verifyBtn = document.getElementById('verifyGoogleMfaBtn');
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = 'Verifying...';
+    
+    fetch('backend/api/verify_google_mfa.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        const userObj = {
+          id: res.data.user_id,
+          name: res.data.full_name,
+          email: res.data.email,
+          role: res.data.role,
+          first_login: res.data.first_login
+        };
+        localStorage.setItem('currentUser', JSON.stringify(userObj));
+        
+        fetchCsrfToken().then(() => {
+          showToast('Login successful!', 'success');
+          setTimeout(() => {
+            if (userObj.first_login) {
+              window.location.href = 'pages/change-password.html';
+            } else {
+              window.location.href = 'dashboard.html';
+            }
+          }, 1000);
+        });
+      } else {
+        showToast(res.message || 'Invalid MFA code.', 'error');
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify & Log In';
+      }
+    })
+    .catch(err => {
+      showToast('Connection error. Please try again.', 'error');
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = 'Verify & Log In';
+    });
+  });
+</script>
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>

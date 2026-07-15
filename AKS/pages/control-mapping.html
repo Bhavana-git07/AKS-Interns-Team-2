@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control Mapping — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ---- CONTROL MAPPING / TAXONOMY SPECIFIC ---- */
+    .taxonomy-table th { text-align: center; }
+    .taxonomy-table th:first-child { text-align: left; }
+    .taxonomy-table td { text-align: center; font-size: 0.82rem; }
+    .taxonomy-table td:first-child { text-align: left; font-size: 0.875rem; }
+
+    .mapping-ref-badge {
+      display: inline-block; padding: 4px 8px; border-radius: var(--radius-sm);
+      font-family: monospace; font-size: 0.75rem; font-weight: 700;
+      border: 1px solid var(--clr-border); background: var(--clr-surface-2);
+      color: var(--clr-text); width: 100px;
+    }
+    .mapping-ref-badge.mapped { border-color: rgba(61,214,172,0.3); color: var(--clr-accent); background: var(--clr-accent-dim); }
+    .mapping-ref-badge.empty  { border-color: rgba(247,95,79,0.2); color: var(--clr-danger); background: rgba(247,95,79,0.06); }
+
+    .taxonomy-search-wrap { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div><div class="sidebar__brand-text">ComplianceAudit</div><div class="sidebar__brand-sub">Readiness Platform</div></div>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__label">Main</div>
+        <a href="../dashboard.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="companies.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Companies
+        </a>
+        <a href="users.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Users
+        </a>
+        <a href="upload-documents.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Documents
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Compliance</div>
+        <a href="assessment.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+          Assessments
+        </a>
+        <a href="gap-analysis.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Gap Analysis
+        </a>
+        <a href="control-mapping.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Control Mapping
+        </a>
+        <a href="reports.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          Reports
+        </a>
+        <a href="ai-assistant.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+          AI Assistant
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Security</div>
+        <a href="audit-trail.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Audit Trail
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar">AD</div>
+        <div class="sidebar__user-info"><div class="sidebar__user-name">Admin User</div><div class="sidebar__user-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar__breadcrumb">
+        <a href="../dashboard.html" style="color:var(--clr-muted);text-decoration:none">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Master Control Taxonomy</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-header">
+        <div class="section-header__text">
+          <h2>Master Control Taxonomy</h2>
+          <p>Unify equivalent control requirements from multiple compliance frameworks side-by-side</p>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="taxonomy-search-wrap">
+        <div class="input-icon-wrap" style="flex:1;max-width:320px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="form-control" id="taxonomySearch" placeholder="Search master controls or clauses…" oninput="searchTaxonomy()">
+        </div>
+        <div style="font-size:0.8rem;color:var(--clr-muted);align-self:center">
+          Showing <strong style="color:var(--clr-accent)">6</strong> consolidated control domains
+        </div>
+      </div>
+
+      <!-- Taxonomy Table -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table class="data-table taxonomy-table" id="taxTable">
+            <thead>
+              <tr>
+                <th style="width:30%">Master Control Concept</th>
+                <th style="width:17.5%">PayNet TPA</th>
+                <th style="width:17.5%">BNM RMiT</th>
+                <th style="width:17.5%">MAS TRM</th>
+                <th style="width:17.5%">NACSA NC-II</th>
+              </tr>
+            </thead>
+            <tbody id="taxTableBody">
+              <!-- Concept 1 -->
+              <tr>
+                <td>
+                  <div style="font-weight:600">Information Security Governance</div>
+                  <div style="font-size:0.75rem;color:var(--clr-muted)">Establishing cybersecurity policies and leadership oversight.</div>
+                </td>
+                <td><span class="mapping-ref-badge mapped">TPA-1.1</span></td>
+                <td><span class="mapping-ref-badge mapped">RMIT-8.1</span></td>
+                <td><span class="mapping-ref-badge mapped">TRM-3.1</span></td>
+                <td><span class="mapping-ref-badge mapped">NCII-Sec22</span></td>
+              </tr>
+              <!-- Concept 2 -->
+              <tr>
+                <td>
+                  <div style="font-weight:600">Employee Awareness &amp; Cyber Training</div>
+                  <div style="font-size:0.75rem;color:var(--clr-muted)">Mandatory info security training cycles for staff.</div>
+                </td>
+                <td><span class="mapping-ref-badge mapped">TPA-2.1</span></td>
+                <td><span class="mapping-ref-badge mapped">RMIT-10.12</span></td>
+                <td><span class="mapping-ref-badge mapped">TRM-12.3</span></td>
+                <td><span class="mapping-ref-badge mapped">NCII-COP-1.5</span></td>
+              </tr>
+              <!-- Concept 3 -->
+              <tr>
+                <td>
+                  <div style="font-weight:600">Privilege &amp; Administrative Access Control</div>
+                  <div style="font-size:0.75rem;color:var(--clr-muted)">Limiting administrator credentials and 2FA logins.</div>
+                </td>
+                <td><span class="mapping-ref-badge mapped">TPA-2.3</span></td>
+                <td><span class="mapping-ref-badge mapped">RMIT-10.53</span></td>
+                <td><span class="mapping-ref-badge mapped">TRM-9.1</span></td>
+                <td><span class="mapping-ref-badge mapped">NCII-COP-3.5</span></td>
+              </tr>
+              <!-- Concept 4 -->
+              <tr>
+                <td>
+                  <div style="font-weight:600">Network Architecture Isolation</div>
+                  <div style="font-size:0.75rem;color:var(--clr-muted)">VLAN routing, network diagrams, and dmz boundary.</div>
+                </td>
+                <td><span class="mapping-ref-badge mapped">TPA-3.4</span></td>
+                <td><span class="mapping-ref-badge mapped">RMIT-App5.1</span></td>
+                <td><span class="mapping-ref-badge mapped">TRM-11.1</span></td>
+                <td><span class="mapping-ref-badge empty">— None</span></td>
+              </tr>
+              <!-- Concept 5 -->
+              <tr>
+                <td>
+                  <div style="font-weight:600">Incident Tabletop Exercises</div>
+                  <div style="font-size:0.75rem;color:var(--clr-muted)">Annual disaster response simulations and playbooks.</div>
+                </td>
+                <td><span class="mapping-ref-badge empty">— None</span></td>
+                <td><span class="mapping-ref-badge mapped">RMIT-11.12</span></td>
+                <td><span class="mapping-ref-badge mapped">TRM-12.2</span></td>
+                <td><span class="mapping-ref-badge mapped">NCII-Sec32</span></td>
+              </tr>
+              <!-- Concept 6 -->
+              <tr>
+                <td>
+                  <div style="font-weight:600">Cryptographical Key Management</div>
+                  <div style="font-size:0.75rem;color:var(--clr-muted)">Encryption key rotation, deployment, and protection.</div>
+                </td>
+                <td><span class="mapping-ref-badge empty">— None</span></td>
+                <td><span class="mapping-ref-badge mapped">RMIT-App8.1</span></td>
+                <td><span class="mapping-ref-badge mapped">TRM-10.1</span></td>
+                <td><span class="mapping-ref-badge mapped">NCII-COP-4.2</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+  let controlsList = [];
+
+  function loadControls() {
+    fetch('../backend/api/control_list.php')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          controlsList = res.data;
+          setupBadgeClickHandlers();
+        }
+      });
+  }
+
+  function setupBadgeClickHandlers() {
+    document.querySelectorAll('.mapping-ref-badge.mapped').forEach(badge => {
+      badge.style.cursor = 'pointer';
+      badge.style.transition = 'all 0.2s ease';
+      badge.addEventListener('mouseover', () => {
+        badge.style.transform = 'translateY(-1px)';
+        badge.style.boxShadow = '0 2px 8px rgba(61,214,172,0.2)';
+      });
+      badge.addEventListener('mouseout', () => {
+        badge.style.transform = 'translateY(0)';
+        badge.style.boxShadow = 'none';
+      });
+      badge.addEventListener('click', () => {
+        const code = badge.textContent.trim();
+        openClauseModal(code);
+      });
+    });
+  }
+
+  function openClauseModal(controlCode) {
+    const c = controlsList.find(ctrl => ctrl.control_code === controlCode);
+    if (!c) return;
+
+    const fwNames = {
+      1: 'PayNet TPA',
+      2: 'BNM RMiT',
+      3: 'MAS TRM',
+      4: 'NACSA NC-II'
+    };
+
+    document.getElementById('modalControlCode').textContent = `Clause: ${escapeHtml(c.control_code)}`;
+    document.getElementById('modalControlFw').textContent = fwNames[c.framework_id] || 'Unknown Framework';
+    document.getElementById('modalControlName').textContent = escapeHtml(c.control_name);
+    document.getElementById('modalControlDesc').textContent = escapeHtml(c.description || 'No description available for this control.');
+
+    openModal('clauseModal');
+  }
+
+  function searchTaxonomy() {
+    const q = document.getElementById('taxonomySearch').value.toLowerCase();
+    
+    document.querySelectorAll('#taxTableBody tr').forEach(row => {
+      const matchText = row.textContent.toLowerCase().includes(q);
+      row.style.display = matchText ? '' : 'none';
+    });
+  }
+
+  window.addEventListener('load', loadControls);
+</script>
+
+<!-- CLAUSE DETAILS MODAL -->
+<div class="modal-overlay" id="clauseModal">
+  <div class="modal" style="max-width:540px">
+    <div class="modal__header">
+      <div class="modal__title" id="modalControlCode">Clause Details</div>
+      <button class="btn-icon" onclick="closeModal('clauseModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal__body">
+      <div style="margin-bottom:16px">
+        <label class="form-label" style="text-transform:uppercase;font-size:0.7rem;color:var(--clr-muted)">Framework</label>
+        <div id="modalControlFw" style="font-weight:600;font-size:0.9rem;color:var(--clr-accent)">Framework Name</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label" style="text-transform:uppercase;font-size:0.7rem;color:var(--clr-muted)">Control Name</label>
+        <div id="modalControlName" style="font-weight:600;font-size:1rem;color:var(--clr-text)">Control Name</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="form-label" style="text-transform:uppercase;font-size:0.7rem;color:var(--clr-muted)">Description / Requirement</label>
+        <p id="modalControlDesc" style="font-size:0.85rem;line-height:1.6;color:var(--clr-text);background:var(--clr-surface-2);border:1px solid var(--clr-border);border-radius:var(--radius-sm);padding:12px;margin:4px 0 0 0">Description</p>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:20px;border-top:1px solid var(--clr-border);padding-top:16px">
+        <button class="btn btn-secondary" onclick="closeModal('clauseModal')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

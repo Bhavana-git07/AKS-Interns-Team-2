@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documents — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ---- DOCUMENTS PAGE SPECIFIC ---- */
+    .dropzone-card {
+      background: var(--clr-surface);
+      border: 2px dashed var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .dropzone-card:hover, .dropzone-card.dragover {
+      border-color: var(--clr-accent);
+      background: rgba(61, 214, 172, 0.03);
+    }
+    .dropzone-card__icon {
+      width: 56px; height: 56px;
+      background: var(--clr-surface-2);
+      border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: var(--clr-muted);
+      margin-bottom: 14px;
+      transition: all var(--transition);
+    }
+    .dropzone-card:hover .dropzone-card__icon, .dropzone-card.dragover .dropzone-card__icon {
+      color: var(--clr-accent);
+      background: var(--clr-accent-dim);
+      transform: translateY(-2px);
+    }
+    .dropzone-card__title { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .dropzone-card__sub { font-size: 0.78rem; color: var(--clr-muted); }
+    
+    .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+    /* upload list */
+    .file-type-icon {
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; flex-shrink: 0;
+    }
+    .file-type-pdf  { background: rgba(247,95,79,0.15); color: var(--clr-danger); }
+    .file-type-xls  { background: rgba(61,214,172,0.15); color: var(--clr-accent); }
+    .file-type-doc  { background: rgba(79,142,247,0.15); color: var(--clr-blue); }
+    .file-type-txt  { background: var(--clr-surface-2); color: var(--clr-text); border: 1px solid var(--clr-border); }
+
+    /* upload simulation progress in modal */
+    .progress-wrapper { display: none; margin-top: 16px; }
+    .progress-bar-container { height: 6px; background: var(--clr-border); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+    .progress-bar-fill { height: 100%; width: 0%; background: var(--clr-accent); transition: width 0.1s linear; }
+    .progress-percentage { font-size: 0.75rem; text-align: right; color: var(--clr-muted); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div><div class="sidebar__brand-text">ComplianceAudit</div><div class="sidebar__brand-sub">Readiness Platform</div></div>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__label">Main</div>
+        <a href="../dashboard.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="companies.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Companies
+        </a>
+        <a href="users.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Users
+        </a>
+        <a href="upload-documents.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Documents
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Compliance</div>
+        <a href="assessment.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+          Assessments
+        </a>
+        <a href="gap-analysis.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Gap Analysis
+        </a>
+        <a href="control-mapping.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Control Mapping
+        </a>
+        <a href="reports.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          Reports
+        </a>
+        <a href="ai-assistant.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+          AI Assistant
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Security</div>
+        <a href="audit-trail.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Audit Trail
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar">AD</div>
+        <div class="sidebar__user-info"><div class="sidebar__user-name">Admin User</div><div class="sidebar__user-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar__breadcrumb">
+        <a href="../dashboard.html" style="color:var(--clr-muted);text-decoration:none">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Documents</span>
+      </div>
+      <div class="topbar__actions">
+        <button class="btn btn-primary btn-sm" onclick="openModal('uploadModal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Upload Evidence
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-header">
+        <div class="section-header__text">
+          <h2>Evidence Management</h2>
+          <p>Upload, organize, and map evidence documents across controls</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid" style="margin-bottom:22px">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg></div>
+          <div class="stat-card__value" id="totalDocs">0</div>
+          <div class="stat-card__label">Total Evidence Files</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="stat-card__value" id="approvedDocs">0</div>
+          <div class="stat-card__label">Approved Evidence</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <div class="stat-card__value" id="pendingDocs">0</div>
+          <div class="stat-card__label">Pending Review</div>
+        </div>
+      </div>
+
+      <!-- Drag & Drop Zone -->
+      <div class="dropzone-card" id="dropzone">
+        <input type="file" id="dropzoneInput" class="file-input" onchange="handleFileSelect(this)">
+        <div class="dropzone-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <div class="dropzone-card__title">Drag & drop your evidence files here</div>
+        <div class="dropzone-card__sub">Supports PDF, XLSX, DOCX, and TXT up to 50MB</div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="input-icon-wrap" style="flex:1;max-width:300px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="form-control" id="docSearch" placeholder="Search by filename…" oninput="filterDocuments()">
+        </div>
+        <select class="form-control" id="filterCompany" style="max-width:180px" onchange="filterDocuments()">
+          <option value="">All Companies</option>
+        </select>
+        <select class="form-control" id="filterFramework" style="max-width:180px" onchange="filterDocuments()">
+          <option value="">All Frameworks</option>
+          <option value="PayNet TPA">PayNet TPA</option>
+          <option value="BNM RMiT">BNM RMiT</option>
+          <option value="MAS TRM">MAS TRM</option>
+          <option value="NACSA NC-II">NACSA NC-II</option>
+        </select>
+      </div>
+
+      <!-- Document Table -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table class="data-table" id="docTable">
+            <thead>
+              <tr>
+                <th>Document</th>
+                <th>Size</th>
+                <th>Company</th>
+                <th>Framework / Mapping</th>
+                <th>Status</th>
+                <th>Upload Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="docTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal">
+    <div class="modal__header">
+      <div class="modal__title">Upload Evidence Document</div>
+      <button class="btn-icon" onclick="closeModal('uploadModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal__body">
+      <form id="uploadForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Select File <span class="req">*</span></label>
+          <input type="file" class="form-control" id="uploadFileSelect" required>
+          <div class="form-error">Please select a file to upload.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Associated Company <span class="req">*</span></label>
+            <select class="form-control" id="uploadCompany" required>
+              <option value="">Select Company</option>
+            </select>
+            <div class="form-error">Please select a company.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Compliance Framework <span class="req">*</span></label>
+            <select class="form-control" id="uploadFramework" onchange="updateControlDropdown(this.value)" required>
+              <option value="">Select Framework</option>
+              <option>PayNet TPA</option>
+              <option>BNM RMiT</option>
+              <option>MAS TRM</option>
+              <option>NACSA NC-II</option>
+            </select>
+            <div class="form-error">Please select a framework.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Target Control Code <span class="req">*</span></label>
+          <select class="form-control" id="uploadControl" required>
+            <option value="">Select Control Code</option>
+            <option>TPA-1.1 (Governance &amp; Risk)</option>
+            <option>TPA-2.3 (Access Control)</option>
+            <option>RMIT-8.1 (Governance Framework)</option>
+            <option>RMIT-10.53 (Access &amp; Identity)</option>
+            <option>TRM-3.1 (Security Governance)</option>
+            <option>TRM-9.1 (Access Control)</option>
+            <option>NCII-Sec22 (Cyber Security Governance)</option>
+            <option>NCII-COP-3.5 (Access Control)</option>
+          </select>
+          <div class="form-error">Please select a target control.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Description / Remarks</label>
+          <textarea class="form-control" id="uploadDesc" rows="2" placeholder="Describe the purpose of this evidence..."></textarea>
+        </div>
+
+        <!-- Progress bar container -->
+        <div class="progress-wrapper" id="progressWrapper">
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBarFill"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-size:0.75rem;color:var(--clr-muted)">Uploading...</span>
+            <span class="progress-percentage" id="progressPercentage">0%</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn-ghost" id="btnCancelUpload" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="btn btn-primary" id="btnStartUpload" onclick="startRealUpload()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        Upload File
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE PREVIEW MODAL -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal" style="width: min(800px, 95vw);">
+    <div class="modal__header">
+      <div class="modal__title" id="previewModalTitle">Evidence Preview</div>
+      <button class="btn-icon" onclick="closeModal('previewModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal__body" style="text-align: center; background: #090d13; display: flex; align-items: center; justify-content: center; min-height: 300px; padding: 16px;">
+      <img id="previewModalImg" src="" alt="Preview" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: var(--radius-sm); border: 1px solid var(--clr-border);">
+    </div>
+    <div class="modal__footer">
+      <a href="" id="previewModalDownload" class="btn btn-primary" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download File
+      </a>
+      <button class="btn btn-ghost" onclick="closeModal('previewModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+  let companiesList = [];
+  let documentsList = [];
+
+  // Drag & drop logic
+  const dropzone = document.getElementById('dropzone');
+  
+  dropzone.addEventListener('click', (e) => {
+    if (e.target !== document.getElementById('dropzoneInput')) {
+      document.getElementById('dropzoneInput').click();
+    }
+  });
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+    }, false);
+  });
+
+  function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      openModal('uploadModal');
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      document.getElementById('uploadFileSelect').files = dataTransfer.files;
+    }
+  }
+
+  dropzone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length > 0) {
+      openModal('uploadModal');
+      document.getElementById('uploadFileSelect').files = files;
+    }
+  }, false);
+
+  const fwNameMap = {
+    1: 'PayNet TPA',
+    2: 'BNM RMiT',
+    3: 'MAS TRM',
+    4: 'NACSA NC-II'
+  };
+
+  // Dynamic dropdown selection helper based on framework
+  let controlMap = {
+    'PayNet TPA': [],
+    'BNM RMiT': [],
+    'MAS TRM': [],
+    'NACSA NC-II': []
+  };
+
+  function updateControlDropdown(framework) {
+    const select = document.getElementById('uploadControl');
+    select.innerHTML = '<option value="">Select Control Code</option>';
+    if (framework && controlMap[framework]) {
+      controlMap[framework].forEach(ctrl => {
+        const opt = document.createElement('option');
+        opt.value = ctrl.split(' ')[0];
+        opt.textContent = ctrl;
+        select.appendChild(opt);
+      });
+    }
+  }
+
+  function loadCompanies() {
+    Promise.all([
+      fetch('../backend/api/company_list.php').then(r => r.json()),
+      fetch('../backend/api/control_list.php').then(r => r.json())
+    ]).then(([compRes, ctrlRes]) => {
+      if (compRes.success) {
+        companiesList = compRes.data;
+        
+        const filterComp = document.getElementById('filterCompany');
+        filterComp.innerHTML = '<option value="">All Companies</option>';
+        companiesList.forEach(c => {
+          filterComp.innerHTML += `<option value="${c.company_id}">${escapeHtml(c.company_name)}</option>`;
+        });
+
+        const uploadComp = document.getElementById('uploadCompany');
+        uploadComp.innerHTML = '<option value="">Select Company</option>';
+        companiesList.forEach(c => {
+          uploadComp.innerHTML += `<option value="${c.company_id}">${escapeHtml(c.company_name)}</option>`;
+        });
+      }
+
+      if (ctrlRes.success) {
+        controlMap = {
+          'PayNet TPA': [],
+          'BNM RMiT': [],
+          'MAS TRM': [],
+          'NACSA NC-II': []
+        };
+        ctrlRes.data.forEach(c => {
+          const fwName = fwNameMap[c.framework_id];
+          if (fwName) {
+            controlMap[fwName].push(`${c.control_code} (${c.control_name})`);
+          }
+        });
+      }
+
+      loadDocuments();
+
+      const params = new URLSearchParams(window.location.search);
+      const companyId = params.get('company_id');
+      const framework = params.get('framework');
+      const controlCode = params.get('control_code');
+      if (companyId && framework && controlCode) {
+        setTimeout(() => {
+          openModal('uploadModal');
+          document.getElementById('uploadCompany').value = companyId;
+          document.getElementById('uploadFramework').value = framework;
+          updateControlDropdown(framework);
+          document.getElementById('uploadControl').value = controlCode;
+        }, 600);
+      }
+    }).catch(err => {
+      loadDocuments();
+      showToast('Error loading company or control list.', 'error');
+    });
+  }
+
+  function loadDocuments() {
+    fetch('../backend/api/document_list.php')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          documentsList = res.data;
+          renderDocuments();
+        } else {
+          showToast(res.message || 'Failed to load documents.', 'error');
+        }
+      })
+      .catch(err => {
+        showToast('Connection error.', 'error');
+      });
+  }
+
+  function renderDocuments() {
+    const tbody = document.getElementById('docTableBody');
+    tbody.innerHTML = '';
+
+    if (documentsList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--clr-muted);padding:20px;">No evidence files found. Upload some to get started.</td></tr>';
+      recalculateStats();
+      return;
+    }
+
+    const formatSize = (bytes) => {
+      if (!bytes || isNaN(bytes)) return 'Unknown';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
+
+    documentsList.forEach(d => {
+      const comp = companiesList.find(c => c.company_id == d.company_id);
+      const compName = comp ? comp.company_name : 'N/A';
+
+      let displayName = d.file_name;
+      const underscoreIdx = d.file_name.indexOf('_');
+      if (underscoreIdx !== -1 && !isNaN(d.file_name.substring(0, underscoreIdx))) {
+        displayName = d.file_name.substring(underscoreIdx + 1);
+      }
+
+      const ext = displayName.split('.').pop().toUpperCase();
+      let typeClass = 'file-type-txt';
+      if (ext === 'PDF') typeClass = 'file-type-pdf';
+      else if (ext === 'XLSX' || ext === 'XLS') typeClass = 'file-type-xls';
+      else if (ext === 'DOCX' || ext === 'DOC') typeClass = 'file-type-doc';
+
+      const fileUrl = `../backend/uploads/${d.file_name}`;
+      const badgeColor = d.status === 'Approved' ? 'green' : 'warn';
+      const sizeStr = formatSize(d.file_size);
+
+      let previewBtnHtml = '';
+      if (['PNG', 'JPG', 'JPEG'].includes(ext)) {
+        previewBtnHtml = `<button class="btn-icon btn-sm" onclick="previewImage('${fileUrl}', '${escapeHtml(displayName)}')" title="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+      } else if (['PDF', 'TXT'].includes(ext)) {
+        previewBtnHtml = `<a class="btn-icon btn-sm" href="${fileUrl}" target="_blank" title="Preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>`;
+      } else {
+        previewBtnHtml = `<button class="btn-icon btn-sm" disabled title="Preview not available" style="opacity:0.4;cursor:not-allowed;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>`;
+      }
+
+      const tr = document.createElement('tr');
+      tr.dataset.filename = displayName.toLowerCase();
+      tr.dataset.companyId = d.company_id;
+      tr.dataset.framework = d.framework || '';
+      tr.innerHTML = `
+        <td>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="file-type-icon ${typeClass}">${ext}</div>
+            <div>
+              <div style="font-weight:600">${escapeHtml(displayName)}</div>
+              <div style="font-size:0.75rem;color:var(--clr-muted)">Evidence file</div>
+            </div>
+          </div>
+        </td>
+        <td style="font-size:0.82rem;color:var(--clr-muted)">${sizeStr}</td>
+        <td style="font-size:0.85rem">${escapeHtml(compName)}</td>
+        <td>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span class="badge badge-blue" style="width:fit-content">${escapeHtml(d.framework || 'Mapped')}</span>
+            <span style="font-size:0.75rem;color:var(--clr-muted)">Control: <strong>${escapeHtml(d.control_code || 'N/A')}</strong></span>
+          </div>
+        </td>
+        <td><span class="badge badge-${badgeColor} badge-dot">${escapeHtml(d.status)}</span></td>
+        <td style="font-size:0.8rem;color:var(--clr-muted)">${d.created_at ? new Date(d.created_at).toLocaleDateString() : 'Today'}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            ${previewBtnHtml}
+            <a class="btn-icon btn-sm" href="${fileUrl}" target="_blank" download="${escapeHtml(displayName)}" title="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></a>
+            <button class="btn-icon btn-sm" onclick="deleteDoc(${d.document_id})" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    recalculateStats();
+  }
+
+  function previewImage(url, name) {
+    document.getElementById('previewModalTitle').textContent = `Evidence Preview — ${name}`;
+    document.getElementById('previewModalImg').src = url;
+    document.getElementById('previewModalDownload').href = url;
+    document.getElementById('previewModalDownload').setAttribute('download', name);
+    openModal('previewModal');
+  }
+
+  function startRealUpload() {
+    const fileSel = document.getElementById('uploadFileSelect');
+    const company_id = document.getElementById('uploadCompany').value;
+    const framework = document.getElementById('uploadFramework').value;
+    const control = document.getElementById('uploadControl').value;
+
+    let valid = true;
+    if (!fileSel.files.length) { document.getElementById('uploadFileSelect').classList.add('error'); valid = false; }
+    if (!company_id) { document.getElementById('uploadCompany').classList.add('error'); valid = false; }
+    if (!framework) { document.getElementById('uploadFramework').classList.add('error'); valid = false; }
+    if (!control) { document.getElementById('uploadControl').classList.add('error'); valid = false; }
+
+    if (!valid) return;
+
+    // File Validation: Extension and Size (Max 10MB)
+    const file = fileSel.files[0];
+    if (file) {
+      const allowedExts = ['pdf', 'xlsx', 'xls', 'docx', 'doc', 'png', 'jpg', 'jpeg', 'txt'];
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!allowedExts.includes(ext)) {
+        showToast('Invalid file type. Allowed formats: PDF, XLSX, XLS, DOCX, DOC, PNG, JPG, TXT.', 'error');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        showToast('File is too large. Maximum size allowed is 10MB.', 'error');
+        return;
+      }
+    }
+
+    document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+    const btnStart = document.getElementById('btnStartUpload');
+    const btnCancel = document.getElementById('btnCancelUpload');
+    const wrapper = document.getElementById('progressWrapper');
+    const fill = document.getElementById('progressBarFill');
+    const pct = document.getElementById('progressPercentage');
+
+    btnStart.disabled = true;
+    btnCancel.disabled = true;
+    wrapper.style.display = 'block';
+
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('company_id', company_id);
+    formData.append('framework', framework);
+    formData.append('control_code', control);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '../backend/api/upload_document.php', true);
+    if (window.csrfToken) {
+      xhr.setRequestHeader('X-CSRF-Token', window.csrfToken);
+    }
+
+    xhr.upload.onprogress = function(e) {
+      if (e.lengthComputable) {
+        const percent = Math.round((e.loaded / e.total) * 100);
+        fill.style.width = percent + '%';
+        pct.textContent = percent + '%';
+      }
+    };
+
+    xhr.onload = function() {
+      setTimeout(() => {
+        closeModal('uploadModal');
+        btnStart.disabled = false;
+        btnCancel.disabled = false;
+        wrapper.style.display = 'none';
+        fill.style.width = '0%';
+        pct.textContent = '0%';
+
+        try {
+          const res = JSON.parse(xhr.responseText);
+          if (res.success) {
+            showToast('Document uploaded successfully!', 'success');
+            document.getElementById('uploadForm').reset();
+            loadDocuments();
+          } else {
+            showToast(res.message || 'Upload failed.', 'error');
+          }
+        } catch (e) {
+          showToast('Failed to parse server response.', 'error');
+        }
+      }, 300);
+    };
+
+    xhr.onerror = function() {
+      showToast('Connection error during upload.', 'error');
+      btnStart.disabled = false;
+      btnCancel.disabled = false;
+      wrapper.style.display = 'none';
+    };
+
+    xhr.send(formData);
+  }
+
+  function deleteDoc(id, name) {
+    if (!name) {
+      if (isNaN(id)) {
+        name = id;
+      } else {
+        const d = documentsList.find(doc => doc.document_id == id);
+        name = d ? d.file_name : 'document';
+        const underscoreIdx = name.indexOf('_');
+        if (underscoreIdx !== -1 && !isNaN(name.substring(0, underscoreIdx))) {
+          name = name.substring(underscoreIdx + 1);
+        }
+      }
+    }
+    confirmDelete(`Delete evidence "${name}"?`, () => {
+      fetch('../backend/api/document_delete.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ document_id: isNaN(id) ? id : parseInt(id) })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showToast('Document deleted.', 'success');
+          loadDocuments();
+        } else {
+          showToast(res.message || 'Failed to delete document.', 'error');
+        }
+      })
+      .catch(err => {
+        showToast('Connection error.', 'error');
+      });
+    });
+  }
+
+  function recalculateStats() {
+    const rows = document.querySelectorAll('#docTableBody tr');
+    let total = 0;
+    let approved = 0;
+    let pending = 0;
+
+    rows.forEach(row => {
+      const dot = row.querySelector('.badge-dot');
+      if (!dot) return;
+      total++;
+      const text = dot.textContent.trim();
+      if (text === 'Approved') approved++;
+      else if (text === 'Pending Review') pending++;
+    });
+
+    document.getElementById('totalDocs').textContent = total;
+    document.getElementById('approvedDocs').textContent = approved;
+    document.getElementById('pendingDocs').textContent = pending;
+  }
+
+  function filterDocuments() {
+    const q = document.getElementById('docSearch').value.toLowerCase();
+    const companyId = document.getElementById('filterCompany').value;
+    const framework = document.getElementById('filterFramework').value;
+
+    document.querySelectorAll('#docTableBody tr').forEach(row => {
+      if (row.querySelector('td colspan')) return; // skip empty row
+      const filenameMatch = row.dataset.filename ? row.dataset.filename.includes(q) : true;
+      const companyMatch = !companyId || row.dataset.companyId == companyId;
+      const frameworkMatch = !framework || row.dataset.framework === framework;
+
+      if (filenameMatch && companyMatch && frameworkMatch) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  window.addEventListener('load', loadCompanies);
+</script>
+</body>
+</html>

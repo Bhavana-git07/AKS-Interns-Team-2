@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Companies — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .company-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      cursor: pointer;
+    }
+    .company-card:hover {
+      border-color: rgba(61,214,172,0.3);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .company-card__top {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .company-logo {
+      width: 44px; height: 44px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #0D1117;
+      flex-shrink: 0;
+    }
+    .company-card__name { font-family: var(--font-display); font-weight: 700; font-size: 0.95rem; }
+    .company-card__reg  { font-size: 0.75rem; color: var(--clr-muted); margin-top: 2px; }
+    .company-card__actions { display: flex; gap: 6px; }
+
+    .company-card__meta {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      font-size: 0.78rem; color: var(--clr-muted);
+      margin-bottom: 14px;
+    }
+    .company-card__meta-item { display: flex; align-items: center; gap: 5px; }
+    .company-card__meta-item svg { width: 12px; height: 12px; }
+
+    .company-card__compliance { }
+    .compliance-label { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 5px; }
+    .compliance-pct { font-weight: 700; }
+
+    .company-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* modal form */
+    .industry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .industry-option {
+      padding: 10px 12px; border-radius: var(--radius-sm);
+      border: 1px solid var(--clr-border);
+      font-size: 0.8rem; cursor: pointer; text-align: center;
+      transition: all var(--transition); color: var(--clr-muted);
+      background: var(--clr-surface-2);
+    }
+    .industry-option:hover { border-color: var(--clr-accent); color: var(--clr-accent); }
+    .industry-option.selected { border-color: var(--clr-accent); background: var(--clr-accent-dim); color: var(--clr-accent); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div><div class="sidebar__brand-text">ComplianceAudit</div><div class="sidebar__brand-sub">Readiness Platform</div></div>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__label">Main</div>
+        <a href="../dashboard.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="companies.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Companies
+        </a>
+        <a href="users.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Users
+        </a>
+        <a href="upload-documents.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Documents
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Compliance</div>
+        <a href="assessment.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>Assessments</a>
+        <a href="gap-analysis.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Gap Analysis</a>
+        <a href="control-mapping.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Control Mapping</a>
+        <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>Reports</a>
+        <a href="ai-assistant.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+          AI Assistant
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Security</div>
+        <a href="audit-trail.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Audit Trail
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar">AD</div>
+        <div class="sidebar__user-info"><div class="sidebar__user-name">Admin User</div><div class="sidebar__user-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar__breadcrumb">
+        <a href="../dashboard.html" style="color:var(--clr-muted);text-decoration:none">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Companies</span>
+      </div>
+      <div class="topbar__actions">
+        <button class="btn btn-primary btn-sm" onclick="prepareAddCompany()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Company
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-header">
+        <div class="section-header__text">
+          <h2>Company Management</h2>
+          <p>Manage all registered client companies and their compliance status</p>
+        </div>
+        <div class="section-header__actions">
+          <button class="btn btn-ghost btn-sm" onclick="exportCompaniesCSV()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid" style="margin-bottom:22px">
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+          <div class="stat-card__value" id="statTotalCompanies">0</div>
+          <div class="stat-card__label">Total Companies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="stat-card__value" id="statActiveAudits">0</div>
+          <div class="stat-card__label">Active Audits</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__icon stat-card__icon--warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+          <div class="stat-card__value" id="statAvgCompliance">0%</div>
+          <div class="stat-card__label">Avg Compliance</div>
+        </div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="input-icon-wrap" style="flex:1;max-width:300px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="form-control" id="companySearch" placeholder="Search companies…" oninput="filterCompanies(this.value)">
+        </div>
+        <select class="form-control" style="max-width:160px" onchange="filterByStatus(this.value)">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="pending">Pending</option>
+        </select>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-icon" id="viewGrid" onclick="setView('grid')" title="Grid view" style="background:var(--clr-accent-dim);border-color:var(--clr-accent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </button>
+          <button class="btn-icon" id="viewList" onclick="setView('list')" title="List view">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Company Grid -->
+      <div class="company-grid" id="companyGrid">
+        <!-- Dynamically populated -->
+      </div><!-- /company-grid -->
+
+      <!-- Table View Container -->
+      <div id="companyTableWrap" class="card" style="display:none; padding:0; overflow:hidden; border-radius:var(--radius-lg); margin-top:16px;">
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Industry</th>
+                <th>Users &amp; Docs</th>
+                <th>Compliance Coverage</th>
+                <th>Status</th>
+                <th style="text-align:right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="companyTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination controls -->
+      <div class="pagination-wrap" id="paginationContainer" style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; background:var(--clr-surface); padding:12px 20px; border-radius:var(--radius-md); border:1px solid var(--clr-border);">
+        <span style="font-size:0.8rem; color:var(--clr-muted)">Showing <span id="pagStart">0</span> to <span id="pagEnd">0</span> of <span id="pagTotal">0</span> companies</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary btn-sm" id="btnPrevPage" onclick="changePage(-1)">Previous</button>
+          <button class="btn btn-secondary btn-sm" id="btnNextPage" onclick="changePage(1)">Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT COMPANY MODAL -->
+<div class="modal-overlay" id="addCompanyModal">
+  <div class="modal">
+    <div class="modal__header">
+      <div class="modal__title" id="modalCompanyTitle">Add New Company</div>
+      <button class="btn-icon" onclick="closeModal('addCompanyModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal__body">
+      <form id="companyForm" novalidate>
+
+        <div class="form-group">
+          <label class="form-label">Company Name <span class="req">*</span></label>
+          <input type="text" class="form-control" id="cmpName" placeholder="e.g. TechCorp Sdn Bhd" required>
+          <div class="form-error">Company name is required.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Registration Number <span class="req" id="cmpRegReq">*</span></label>
+            <input type="text" class="form-control" id="cmpReg" placeholder="e.g. 202301-00123" required>
+            <div class="form-error">Registration number is required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date Registered</label>
+            <input type="date" class="form-control" id="cmpDate">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contact Email <span class="req">*</span></label>
+            <input type="email" class="form-control" id="cmpEmail" placeholder="contact@company.com" required>
+            <div class="form-error">Valid email is required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" id="cmpPhone" placeholder="+60 12 345 6789">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Industry</label>
+          <div class="industry-grid">
+            <div class="industry-option selected" onclick="selectIndustry(this)">🏦 Banking</div>
+            <div class="industry-option" onclick="selectIndustry(this)">💳 Fintech</div>
+            <div class="industry-option" onclick="selectIndustry(this)">🔒 Cybersecurity</div>
+            <div class="industry-option" onclick="selectIndustry(this)">🏥 Healthcare</div>
+            <div class="industry-option" onclick="selectIndustry(this)">⚡ Utilities</div>
+            <div class="industry-option" onclick="selectIndustry(this)">🏗️ Other</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Compliance Frameworks</label>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer">
+              <input type="checkbox" checked style="accent-color:var(--clr-accent)"> PayNet TPA
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer">
+              <input type="checkbox" style="accent-color:var(--clr-accent)"> BNM RMiT
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer">
+              <input type="checkbox" style="accent-color:var(--clr-accent)"> MAS TRM
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer">
+              <input type="checkbox" style="accent-color:var(--clr-accent)"> NACSA NC-II
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea class="form-control" id="cmpAddress" placeholder="Full business address…" rows="2"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-control" id="cmpStatus">
+            <option value="active">Active</option>
+            <option value="pending">Pending</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </form>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn-ghost" onclick="closeModal('addCompanyModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCompany()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Company
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+  let companiesList = [];
+  let editingId = null;
+  let currentPage = 1;
+  const itemsPerPage = 6;
+  let filteredList = [];
+  let currentSearchQuery = '';
+  let currentStatusFilter = '';
+  let currentViewMode = 'grid'; // 'grid' or 'list'
+
+  function selectIndustry(el) {
+    document.querySelectorAll('.industry-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function filterCompanies(q) {
+    currentSearchQuery = q;
+    currentPage = 1;
+    applyFilters();
+  }
+
+  function filterByStatus(status) {
+    currentStatusFilter = status;
+    currentPage = 1;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    filteredList = companiesList.filter(c => {
+      const name = c.company_name || '';
+      const nameMatch = name.toLowerCase().includes(currentSearchQuery.toLowerCase());
+      const regMatch = (c.registration_number || '').toLowerCase().includes(currentSearchQuery.toLowerCase());
+      const indMatch = (c.industry || '').toLowerCase().includes(currentSearchQuery.toLowerCase());
+      const matchesSearch = nameMatch || regMatch || indMatch;
+      
+      const matchesStatus = !currentStatusFilter || (c.status || 'active').toLowerCase() === currentStatusFilter.toLowerCase();
+      
+      return matchesSearch && matchesStatus;
+    });
+    renderCompanies();
+  }
+
+  function setView(mode) {
+    currentViewMode = mode;
+    const grid = document.getElementById('companyGrid');
+    const tableWrap = document.getElementById('companyTableWrap');
+    const viewGridBtn = document.getElementById('viewGrid');
+    const viewListBtn = document.getElementById('viewList');
+
+    if (mode === 'list') {
+      grid.style.display = 'none';
+      tableWrap.style.display = 'block';
+      viewListBtn.style.background = 'var(--clr-accent-dim)';
+      viewListBtn.style.borderColor = 'var(--clr-accent)';
+      viewGridBtn.style.background = '';
+      viewGridBtn.style.borderColor = '';
+    } else {
+      grid.style.display = 'grid';
+      tableWrap.style.display = 'none';
+      viewGridBtn.style.background = 'var(--clr-accent-dim)';
+      viewGridBtn.style.borderColor = 'var(--clr-accent)';
+      viewListBtn.style.background = '';
+      viewListBtn.style.borderColor = '';
+    }
+    renderCompanies();
+  }
+
+  function changePage(dir) {
+    const totalPages = Math.ceil(filteredList.length / itemsPerPage) || 1;
+    currentPage += dir;
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    renderCompanies();
+  }
+
+  function prepareAddCompany() {
+    editingId = null;
+    document.getElementById('modalCompanyTitle').textContent = 'Add New Company';
+    document.getElementById('cmpName').value = '';
+    
+    const cmpReg = document.getElementById('cmpReg');
+    cmpReg.value = 'Will be auto-assigned';
+    cmpReg.readOnly = true;
+    cmpReg.disabled = true;
+    document.getElementById('cmpRegReq').style.display = 'none';
+
+    document.getElementById('cmpEmail').value = '';
+    document.getElementById('cmpPhone').value = '';
+    document.getElementById('cmpAddress').value = '';
+    document.getElementById('cmpStatus').value = 'active';
+    document.querySelectorAll('.industry-option').forEach((opt, idx) => {
+      opt.classList.toggle('selected', idx === 0);
+    });
+    
+    // Clear validation states
+    document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
+    
+    openModal('addCompanyModal');
+  }
+
+  function editCompany(id) {
+    const c = companiesList.find(comp => comp.company_id == id);
+    if (!c) return;
+
+    editingId = id;
+    document.getElementById('modalCompanyTitle').textContent = 'Edit Company';
+    document.getElementById('cmpName').value = c.company_name;
+    
+    const cmpReg = document.getElementById('cmpReg');
+    cmpReg.value = c.registration_number || '';
+    cmpReg.readOnly = true;
+    cmpReg.disabled = false;
+    document.getElementById('cmpRegReq').style.display = 'none';
+
+    document.getElementById('cmpEmail').value = c.contact_email || '';
+    document.getElementById('cmpPhone').value = c.contact_phone || '';
+    document.getElementById('cmpAddress').value = c.address || '';
+    document.getElementById('cmpStatus').value = c.status || 'active';
+
+    document.querySelectorAll('.industry-option').forEach(opt => {
+      opt.classList.toggle('selected', opt.textContent.trim().includes(c.industry));
+    });
+
+    // Clear validation states
+    document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
+
+    openModal('addCompanyModal');
+  }
+
+  function deleteCompany(btn, id, name) {
+    if (!name) {
+      if (isNaN(id)) {
+        name = id;
+      } else {
+        const c = companiesList.find(comp => comp.company_id == id);
+        name = c ? c.company_name : 'Company';
+      }
+    }
+    confirmDelete(`Delete "${name}"? This will remove all associated data.`, () => {
+      fetch('../backend/api/company_delete.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company_id: isNaN(id) ? id : parseInt(id) })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showToast(`${name} deleted successfully.`, 'success');
+          loadCompanies();
+        } else {
+          showToast(res.message || 'Failed to delete company.', 'error');
+        }
+      })
+      .catch(err => {
+        showToast('Connection error.', 'error');
+      });
+    });
+  }
+
+  function saveCompany() {
+    const name = document.getElementById('cmpName').value.trim();
+    const reg  = document.getElementById('cmpReg').value.trim();
+    const email = document.getElementById('cmpEmail').value.trim();
+    const phone = document.getElementById('cmpPhone').value.trim();
+    const address = document.getElementById('cmpAddress').value.trim();
+    const status = document.getElementById('cmpStatus').value;
+    
+    const selectedInd = document.querySelector('.industry-option.selected');
+    const industry = selectedInd ? selectedInd.textContent.trim() : '';
+
+    // Clear validation states
+    document.querySelectorAll('.form-control').forEach(el => el.classList.remove('error'));
+    document.querySelectorAll('.form-error').forEach(el => el.classList.remove('show'));
+
+    let valid = true;
+    if (!name)  { document.getElementById('cmpName').classList.add('error');  document.getElementById('cmpName').closest('.form-group').querySelector('.form-error').classList.add('show'); valid = false; }
+    // Only require registration number validation when editing
+    if (editingId && !reg) { document.getElementById('cmpReg').classList.add('error');   document.getElementById('cmpReg').closest('.form-group').querySelector('.form-error').classList.add('show'); valid = false; }
+    if (!email) { document.getElementById('cmpEmail').classList.add('error'); document.getElementById('cmpEmail').closest('.form-group').querySelector('.form-error').classList.add('show'); valid = false; }
+    if (!valid) return;
+
+    const payload = {
+      company_name: name,
+      contact_email: email,
+      contact_phone: phone,
+      address: address,
+      industry: industry,
+      status: status
+    };
+
+    let url = '../backend/api/company_add.php';
+    if (editingId) {
+      payload.company_id = editingId;
+      payload.registration_number = reg;
+      url = '../backend/api/company_update.php';
+    }
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        if (editingId) {
+          showToast('Company updated successfully!', 'success');
+        } else {
+          showToast('Company added successfully! Reg No: ' + res.data.registration_number, 'success');
+        }
+        closeModal('addCompanyModal');
+        loadCompanies();
+      } else {
+        showToast(res.message || 'Failed to save company.', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('Connection error. Please try again.', 'error');
+    });
+  }
+
+  function fetchUserAndDocCount(cid) {
+    fetch(`../backend/api/user_list.php?company_id=${cid}`)
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          const els = document.querySelectorAll(`.user-count-${cid}`);
+          els.forEach(el => el.textContent = res.data.length);
+        }
+      });
+
+    fetch(`../backend/api/document_list.php?company_id=${cid}`)
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          const els = document.querySelectorAll(`.doc-count-${cid}`);
+          els.forEach(el => el.textContent = res.data.length);
+        }
+      });
+  }
+
+  function renderCompanies() {
+    const grid = document.getElementById('companyGrid');
+    const tableBody = document.getElementById('companyTableBody');
+    grid.innerHTML = '';
+    tableBody.innerHTML = '';
+
+    const totalCount = filteredList.length;
+    const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const pageItems = filteredList.slice(startIndex, endIndex);
+
+    const computedStart = totalCount === 0 ? 0 : startIndex + 1;
+    const computedEnd = Math.min(endIndex, totalCount);
+
+    // Update pagination controls text
+    document.getElementById('pagStart').textContent = computedStart;
+    document.getElementById('pagEnd').textContent = computedEnd;
+    document.getElementById('pagTotal').textContent = totalCount;
+
+    document.getElementById('btnPrevPage').disabled = currentPage === 1;
+    document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+
+    if (totalCount === 0) {
+      grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--clr-muted); padding: 40px;">No companies found.</div>';
+      tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--clr-muted); padding:30px;">No companies found.</td></tr>';
+      return;
+    }
+
+    // Render Grid Cards
+    pageItems.forEach(c => {
+      const name = c.company_name || '';
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CO';
+      const colors = ['#3DD6AC', '#4F8EF7', '#F7B24F', '#9F7AEA', '#F75F4F'];
+      const bg = colors[name.length % colors.length];
+
+      const compliancePct = Math.round(c.compliance_percentage || 0);
+      const progressColor = compliancePct >= 80 ? 'green' : (compliancePct >= 50 ? 'blue' : 'warn');
+
+      const card = document.createElement('div');
+      card.className = 'company-card';
+      card.dataset.name = name.toLowerCase();
+      card.dataset.status = (c.status || 'active').toLowerCase();
+      card.innerHTML = `
+        <div class="company-card__top">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div class="company-logo" style="background:${bg}">${initials}</div>
+            <div>
+              <div class="company-card__name">${escapeHtml(name)}</div>
+              <div class="company-card__reg">Reg: ${escapeHtml(c.registration_number || 'N/A')}</div>
+            </div>
+          </div>
+          <div class="company-card__actions">
+            <span class="badge badge-${c.status === 'active' ? 'green' : (c.status === 'pending' ? 'warn' : 'subtle')} badge-dot">${escapeHtml(c.status || 'active')}</span>
+          </div>
+        </div>
+        <div class="company-card__meta">
+          <div class="company-card__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="user-count-${c.company_id}">0</span> users</div>
+          <div class="company-card__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg><span class="doc-count-${c.company_id}">0</span> docs</div>
+          <div class="company-card__meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${escapeHtml(c.industry || 'Banking')}</div>
+        </div>
+        <div class="company-card__compliance">
+          <div class="compliance-label">
+            <span>Compliance Coverage</span>
+            <span class="compliance-pct" style="color:var(--clr-${progressColor})">${compliancePct}%</span>
+          </div>
+          <div class="progress-bar-track"><div class="progress-bar progress-bar--${progressColor}" style="width:${compliancePct}%"></div></div>
+        </div>
+        <div class="divider" style="margin:14px 0 12px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary btn-sm" style="flex:1" onclick="editCompany(${c.company_id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </button>
+          <a class="btn btn-primary btn-sm" style="flex:1;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;" href="assessment.html?company_id=${c.company_id}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Audit
+          </a>
+          <button class="btn-icon btn-sm" onclick="deleteCompany(this, ${c.company_id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Render Table Rows
+    pageItems.forEach(c => {
+      const name = c.company_name || '';
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CO';
+      const colors = ['#3DD6AC', '#4F8EF7', '#F7B24F', '#9F7AEA', '#F75F4F'];
+      const bg = colors[name.length % colors.length];
+      const compliancePct = Math.round(c.compliance_percentage || 0);
+      const progressColor = compliancePct >= 80 ? 'green' : (compliancePct >= 50 ? 'blue' : 'warn');
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div class="company-logo" style="background:${bg}; width:36px; height:36px; font-size:0.85rem;">${initials}</div>
+            <div>
+              <div style="font-weight:700; color:#fff;">${escapeHtml(name)}</div>
+              <div style="font-size:0.75rem; color:var(--clr-muted);">Reg: ${escapeHtml(c.registration_number || 'N/A')}</div>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span style="font-size:0.82rem; color:var(--clr-text); font-weight:500;">${escapeHtml(c.industry || 'Banking')}</span>
+        </td>
+        <td>
+          <div style="display:flex; gap:10px; font-size:0.78rem; color:var(--clr-muted)">
+            <span style="display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="user-count-${c.company_id}">0</span></span>
+            <span style="display:flex; align-items:center; gap:4px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg><span class="doc-count-${c.company_id}">0</span></span>
+          </div>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px; width:150px;">
+            <div class="progress-bar-track" style="flex:1; height:6px;">
+              <div class="progress-bar progress-bar--${progressColor}" style="width:${compliancePct}%"></div>
+            </div>
+            <span style="font-size:0.78rem; font-weight:700; color:var(--clr-${progressColor})">${compliancePct}%</span>
+          </div>
+        </td>
+        <td>
+          <span class="badge badge-${c.status === 'active' ? 'green' : (c.status === 'pending' ? 'warn' : 'subtle')} badge-dot">${escapeHtml(c.status || 'active')}</span>
+        </td>
+        <td style="text-align:right">
+          <div style="display:inline-flex; gap:6px;">
+            <button class="btn btn-secondary btn-sm" onclick="editCompany(${c.company_id})" title="Edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <a class="btn btn-primary btn-sm" href="assessment.html?company_id=${c.company_id}" title="Audit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </a>
+            <button class="btn-icon btn-sm" onclick="deleteCompany(this, ${c.company_id})" title="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    // Fetch dynamic counts for all items on page
+    pageItems.forEach(c => {
+      fetchUserAndDocCount(c.company_id);
+    });
+
+    document.querySelectorAll('.progress-bar').forEach(b => {
+      const w = b.style.width; b.style.width = '0';
+      requestAnimationFrame(() => setTimeout(() => b.style.width = w, 80));
+    });
+  }
+
+  function loadCompanies() {
+    Promise.all([
+      fetch('../backend/api/company_list.php').then(r => r.json()),
+      fetch('../backend/api/assessment_list.php').then(r => r.json()).catch(() => ({ success: false, data: [] }))
+    ])
+    .then(([compRes, assessRes]) => {
+      if (compRes.success) {
+        companiesList = compRes.data;
+        const assessmentsList = assessRes.success ? assessRes.data : [];
+
+        // Update stats card counters
+        document.getElementById('statTotalCompanies').textContent = companiesList.length;
+        document.getElementById('statActiveAudits').textContent = assessmentsList.filter(a => a.compliance_percentage < 100).length;
+        
+        let avgPct = 0;
+        if (assessmentsList.length > 0) {
+          const sum = assessmentsList.reduce((acc, curr) => acc + parseFloat(curr.compliance_percentage || 0), 0);
+          avgPct = Math.round(sum / assessmentsList.length);
+        }
+        document.getElementById('statAvgCompliance').textContent = avgPct + '%';
+
+        applyFilters();
+      } else {
+        showToast(compRes.message || 'Failed to load companies.', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('Failed to connect to backend.', 'error');
+    });
+  }
+
+  function exportCompaniesCSV() {
+    if (!companiesList || companiesList.length === 0) {
+      showToast('No companies available to export.', 'error');
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Company Name,Registration Number,Industry,Contact Email,Contact Phone,Created At\n";
+
+    companiesList.forEach(c => {
+      const name = `"${(c.company_name || '').replace(/"/g, '""')}"`;
+      const reg = `"${(c.registration_number || '').replace(/"/g, '""')}"`;
+      const ind = `"${(c.industry || '').replace(/"/g, '""')}"`;
+      const email = `"${(c.contact_email || '').replace(/"/g, '""')}"`;
+      const phone = `"${(c.contact_phone || '').replace(/"/g, '""')}"`;
+      const date = `"${c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}"`;
+      
+      csvContent += `${name},${reg},${ind},${email},${phone},${date}\n`;
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `companies_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Companies list exported successfully as CSV!', 'success');
+  }
+
+  window.addEventListener('load', () => {
+    setView('grid');
+    loadCompanies();
+  });
+</script>
+</body>
+</html>

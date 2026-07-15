@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Users — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .user-avatar-cell { display: flex; align-items: center; gap: 10px; }
+    .user-info { }
+    .user-name  { font-weight: 600; font-size: 0.875rem; }
+    .user-email { font-size: 0.75rem; color: var(--clr-muted); }
+
+    .role-pill {
+      padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+      display: inline-block;
+    }
+    .role-admin   { background: rgba(247,95,79,0.12);   color: var(--clr-danger); }
+    .role-user    { background: var(--clr-blue-dim);    color: var(--clr-blue); }
+    .role-auditor { background: rgba(159,122,234,0.12); color: #9F7AEA; }
+
+    .pw-temp-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(247,178,79,0.1); color: var(--clr-warn);
+      border: 1px solid rgba(247,178,79,0.25);
+      padding: 3px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 600;
+    }
+
+    /* temp password display */
+    .temp-pw-box {
+      background: var(--clr-surface-2);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-top: 8px;
+    }
+    .temp-pw-value { font-family: monospace; font-size: 1rem; letter-spacing: 0.1em; color: var(--clr-accent); }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div><div class="sidebar__brand-text">ComplianceAudit</div><div class="sidebar__brand-sub">Readiness Platform</div></div>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__label">Main</div>
+        <a href="../dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</a>
+        <a href="companies.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Companies</a>
+        <a href="users.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Users</a>
+        <a href="upload-documents.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Documents</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Compliance</div>
+        <a href="assessment.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>Assessments</a>
+        <a href="gap-analysis.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Gap Analysis</a>
+        <a href="control-mapping.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Control Mapping</a>
+        <a href="reports.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>Reports</a>
+        <a href="ai-assistant.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+          AI Assistant
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Security</div>
+        <a href="audit-trail.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Audit Trail
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar">AD</div>
+        <div class="sidebar__user-info"><div class="sidebar__user-name">Admin User</div><div class="sidebar__user-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar__breadcrumb">
+        <a href="../dashboard.html" style="color:var(--clr-muted);text-decoration:none">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Users</span>
+      </div>
+      <div class="topbar__actions">
+        <button class="btn btn-primary btn-sm" onclick="prepareAddUser()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Add User
+        </button>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-header">
+        <div class="section-header__text">
+          <h2>User Management</h2>
+          <p>Manage platform users, roles, and access permissions</p>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid" style="margin-bottom:22px">
+        <div class="stat-card"><div class="stat-card__icon stat-card__icon--blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="stat-card__value" id="statTotalUsers">0</div><div class="stat-card__label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-card__icon stat-card__icon--green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div><div class="stat-card__value" id="statActiveUsers">0</div><div class="stat-card__label">Active Users</div></div>
+        <div class="stat-card"><div class="stat-card__icon stat-card__icon--warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div><div class="stat-card__value" id="statTempPasswords">0</div><div class="stat-card__label">Temp Password</div></div>
+        <div class="stat-card"><div class="stat-card__icon stat-card__icon--danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="18" x2="17" y2="18"/></svg></div><div class="stat-card__value" id="statDeactivatedUsers">0</div><div class="stat-card__label">Deactivated</div></div>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div class="input-icon-wrap" style="flex:1;max-width:280px">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="form-control" placeholder="Search by name or email…" oninput="tableSearch2(this.value)">
+        </div>
+        <select class="form-control" style="max-width:140px" onchange="filterByRole(this.value)">
+          <option value="">All roles</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+        </select>
+        <select class="form-control" id="userCompanyFilter" style="max-width:140px" onchange="loadUsers()">
+          <option value="">All companies</option>
+        </select>
+      </div>
+
+      <!-- Table -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="table-wrap">
+          <table class="data-table" id="usersTable">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Last Login</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal__header">
+      <div class="modal__title" id="modalUserTitle">Add New User</div>
+      <button class="btn-icon" onclick="closeModal('addUserModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal__body">
+      <div class="alert alert-info" style="margin-bottom:18px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>A temporary password will be auto-generated and emailed to the user. They must change it on first login.</span>
+      </div>
+      <form id="userForm" novalidate>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name <span class="req">*</span></label>
+            <input type="text" class="form-control" id="uFname" placeholder="First name" required>
+            <div class="form-error">Required.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name <span class="req">*</span></label>
+            <input type="text" class="form-control" id="uLname" placeholder="Last name" required>
+            <div class="form-error">Required.</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address <span class="req">*</span></label>
+          <div class="input-icon-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input type="email" class="form-control" id="uEmail" placeholder="user@company.com" required>
+          </div>
+          <div class="form-error">Valid email is required.</div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role <span class="req">*</span></label>
+            <select class="form-control" id="uRole">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company</label>
+            <select class="form-control" id="uCompany">
+              <option value="">— Platform (no company)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" class="form-control" placeholder="+60 12 345 6789">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Temporary Password</label>
+          <div class="temp-pw-box">
+            <span class="temp-pw-value" id="tempPwDisplay">—</span>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="generateTempPw()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              Generate
+            </button>
+          </div>
+          <div class="form-hint">Auto-generated. User must change this on first login.</div>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;cursor:pointer;color:var(--clr-text)">
+            <input type="checkbox" checked style="accent-color:var(--clr-accent)"> Send login credentials via email
+          </label>
+        </div>
+      </form>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn-ghost" onclick="closeModal('addUserModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        Create User
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PW MODAL -->
+<div class="modal-overlay" id="resetPwModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal__header">
+      <div class="modal__title">Reset Password</div>
+      <button class="btn-icon" onclick="closeModal('resetPwModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal__body">
+      <p style="font-size:0.85rem;color:var(--clr-muted);margin-bottom:16px">A new temporary password will be generated for <strong id="resetUserName" style="color:var(--clr-text)"></strong>. They must change it on next login.</p>
+      <div class="temp-pw-box">
+        <span class="temp-pw-value" id="resetPwDisplay">—</span>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="generateResetPw()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Regenerate
+        </button>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <button class="btn btn-ghost" onclick="closeModal('resetPwModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmReset()">Send &amp; Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+  let companiesList = [];
+  let usersList = [];
+  let editingUserId = null;
+  let resetUserId = null;
+  let resetUserName = '';
+
+  function loadCompanies() {
+    fetch('../backend/api/company_list.php')
+      .then(r => r.json())
+      .catch(err => {
+        console.error("Failed to load companies dropdowns:", err);
+        return { success: false, data: [] };
+      })
+      .then(res => {
+        if (res.success) {
+          companiesList = res.data;
+          
+          const filterDropdown = document.getElementById('userCompanyFilter');
+          filterDropdown.innerHTML = '<option value="">All companies</option>';
+          companiesList.forEach(c => {
+            filterDropdown.innerHTML += `<option value="${c.company_id}">${escapeHtml(c.company_name)}</option>`;
+          });
+
+          const modalDropdown = document.getElementById('uCompany');
+          modalDropdown.innerHTML = '<option value="">— Platform (no company)</option>';
+          companiesList.forEach(c => {
+            modalDropdown.innerHTML += `<option value="${c.company_id}">${escapeHtml(c.company_name)}</option>`;
+          });
+        }
+        
+        // Always load users regardless of whether companies load successfully
+        loadUsers();
+      });
+  }
+
+  function loadUsers() {
+    const compFilter = document.getElementById('userCompanyFilter').value;
+    const url = compFilter ? `../backend/api/user_list.php?company_id=${compFilter}` : '../backend/api/user_list.php';
+    
+    fetch(url)
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          usersList = res.data;
+          renderUsers();
+        } else {
+          showToast(res.message || 'Failed to load users.', 'error');
+        }
+      })
+      .catch(err => {
+        showToast('Connection error.', 'error');
+      });
+  }
+
+  function renderUsers() {
+    const tbody = document.querySelector('#usersTable tbody');
+    tbody.innerHTML = '';
+
+    const total = usersList.length;
+    const tempPw = usersList.filter(u => u.first_login).length;
+    const active = total;
+    const deactivated = 0;
+
+    document.getElementById('statTotalUsers').textContent = total;
+    document.getElementById('statActiveUsers').textContent = active;
+    document.getElementById('statTempPasswords').textContent = tempPw;
+    document.getElementById('statDeactivatedUsers').textContent = deactivated;
+
+    if (usersList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--clr-muted);padding:20px;">No users found.</td></tr>';
+      return;
+    }
+
+    usersList.forEach(u => {
+      const comp = companiesList.find(c => c.company_id == u.company_id);
+      const compName = comp ? comp.company_name : '— Platform';
+
+      const name = u.full_name || '';
+      const initials = name.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'US';
+      const colors = ['avatar--blue', 'avatar--purple', 'avatar--orange'];
+      const avatarClass = colors[u.user_id % colors.length];
+
+      const statusBadge = u.first_login 
+        ? `<div style="display:flex;flex-direction:column;gap:4px">
+             <span class="badge badge-green badge-dot">Active</span>
+             <span class="pw-temp-badge">🔒 Temp PW</span>
+           </div>`
+        : `<span class="badge badge-green badge-dot">Active</span>`;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>
+          <div class="user-avatar-cell">
+            <div class="avatar ${avatarClass}">${initials}</div>
+            <div class="user-info">
+              <div class="user-name">${escapeHtml(u.full_name)}</div>
+              <div class="user-email">${escapeHtml(u.email)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="role-pill role-${escapeHtml(u.role)}">${escapeHtml(u.role.toUpperCase())}</span></td>
+        <td style="font-size:0.85rem">${escapeHtml(compName)}</td>
+        <td>${statusBadge}</td>
+        <td style="font-size:0.8rem;color:var(--clr-muted)">${u.created_at ? new Date(u.created_at).toLocaleDateString() : 'Never'}</td>
+        <td>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary btn-sm" onclick="editUser(${u.user_id})">Edit</button>
+            <button class="btn-icon" onclick="resetPw(${u.user_id})" title="Reset password"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></button>
+            <button class="btn-icon" onclick="deleteUser(${u.user_id})" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function tableSearch2(q) {
+    document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+      row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
+  }
+
+  function filterByRole(role) {
+    document.querySelectorAll('#usersTable tbody tr').forEach(row => {
+      const roleCell = row.querySelector('.role-pill');
+      row.style.display = !role || roleCell?.textContent.toLowerCase() === role ? '' : 'none';
+    });
+  }
+
+  function prepareAddUser() {
+    editingUserId = null;
+    document.getElementById('modalUserTitle').textContent = 'Add New User';
+    document.getElementById('userForm').reset();
+    document.getElementById('tempPwDisplay').textContent = '—';
+    openModal('addUserModal');
+  }
+
+  function editUser(id) {
+    const u = usersList.find(usr => usr.user_id == id);
+    if (!u) return;
+
+    editingUserId = id;
+    document.getElementById('modalUserTitle').textContent = `Edit User — ${u.full_name}`;
+    
+    const parts = u.full_name.split(' ');
+    const fname = parts[0] || '';
+    const lname = parts.slice(1).join(' ') || '';
+
+    document.getElementById('uFname').value = fname;
+    document.getElementById('uLname').value = lname;
+    document.getElementById('uEmail').value = u.email;
+    document.getElementById('uRole').value = u.role;
+    document.getElementById('uCompany').value = u.company_id || '';
+    document.getElementById('tempPwDisplay').textContent = 'Password will remain unchanged';
+    
+    openModal('addUserModal');
+  }
+
+  function saveUser() {
+    const fname = document.getElementById('uFname').value.trim();
+    const lname = document.getElementById('uLname').value.trim();
+    const email = document.getElementById('uEmail').value.trim();
+    const role = document.getElementById('uRole').value;
+    const company_id = document.getElementById('uCompany').value;
+
+    let valid = true;
+    if (!fname) { document.getElementById('uFname').classList.add('error'); document.getElementById('uFname').closest('.form-group').querySelector('.form-error').classList.add('show'); valid = false; }
+    if (!lname) { document.getElementById('uLname').classList.add('error'); document.getElementById('uLname').closest('.form-group').querySelector('.form-error').classList.add('show'); valid = false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { document.getElementById('uEmail').classList.add('error'); valid = false; }
+    if (!valid) return;
+
+    const payload = {
+      full_name: fname + ' ' + lname,
+      email: email,
+      role: role,
+      company_id: company_id ? parseInt(company_id) : null,
+      password: document.getElementById('tempPwDisplay').textContent
+    };
+
+    let url = '../backend/api/user_add.php';
+    if (editingUserId) {
+      payload.user_id = editingUserId;
+      url = '../backend/api/user_update.php';
+    }
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        closeModal('addUserModal');
+        showToast(editingUserId ? 'User updated successfully!' : 'User created successfully!', 'success');
+        
+        if (!editingUserId && res.data && res.data.temporary_password) {
+          setTimeout(() => {
+            alert(`User created successfully!\n\nTemporary Password: ${res.data.temporary_password}\n\nPlease copy this password and share it with the user.`);
+          }, 400);
+        }
+        
+        loadUsers();
+      } else {
+        showToast(res.message || 'Failed to save user.', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('Connection error. Please try again.', 'error');
+    });
+  }
+
+  function deleteUser(id, name) {
+    if (!name) {
+      if (isNaN(id)) {
+        name = id;
+      } else {
+        const u = usersList.find(usr => usr.user_id == id);
+        name = u ? u.full_name : 'User';
+      }
+    }
+    confirmDelete(`Remove user "${name}"?`, () => {
+      fetch('../backend/api/user_delete.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: isNaN(id) ? id : parseInt(id) })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showToast(`${name} deleted successfully.`, 'success');
+          loadUsers();
+        } else {
+          showToast(res.message || 'Failed to delete user.', 'error');
+        }
+      })
+      .catch(err => {
+        showToast('Connection error.', 'error');
+      });
+    });
+  }
+
+  function resetPw(id, name) {
+    if (!name) {
+      if (isNaN(id)) {
+        name = id;
+      } else {
+        const u = usersList.find(usr => usr.user_id == id);
+        name = u ? u.full_name : 'User';
+      }
+    }
+    resetUserId = isNaN(id) ? id : parseInt(id);
+    resetUserName = name;
+    document.getElementById('resetUserName').textContent = name;
+    document.getElementById('resetPwDisplay').textContent = 'Password will be auto-generated';
+    openModal('resetPwModal');
+  }
+
+  function confirmReset() {
+    const password = document.getElementById('resetPwDisplay').textContent;
+    fetch('../backend/api/reset_password.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: resetUserId, password: password })
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        closeModal('resetPwModal');
+        showToast('Password reset successfully.', 'success');
+        setTimeout(() => {
+          alert(`Password reset successfully for ${resetUserName}!\n\nNew Temporary Password: ${res.data.temporary_password}\n\nPlease copy this password and share it with the user.`);
+        }, 400);
+        loadUsers();
+      } else {
+        showToast(res.message || 'Failed to reset password.', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('Connection error.', 'error');
+    });
+  }
+
+  function generateRandomPw() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let pw = '';
+    for (let i = 0; i < 8; i++) {
+      pw += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pw;
+  }
+
+  function generateTempPw() {
+    document.getElementById('tempPwDisplay').textContent = generateRandomPw();
+  }
+
+  function generateResetPw() {
+    document.getElementById('resetPwDisplay').textContent = generateRandomPw();
+  }
+
+  window.addEventListener('load', loadCompanies);
+</script>
+</body>
+</html>

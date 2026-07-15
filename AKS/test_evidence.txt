@@ -1,0 +1,19 @@
+COMPLIANCE AUDIT EVIDENCE - ACCESS CONTROL POLICY
+Reference: ACC-2026-V1.0
+Entity: Global Finance Corp
+
+This document outlines the corporate Access Control and Identity Management policies as required by regulatory compliance frameworks.
+
+1. Governance Framework
+The Executive Board oversees all security governance. Security policies are reviewed annually to align with industry standard frameworks.
+
+2. Access Control & Identity Management
+- All administrator accounts must utilize Multi-Factor Authentication (MFA/2FA) for logging in.
+- Passwords must be at least 12 characters long and contain uppercase, lowercase, numbers, and special characters.
+- Access privileges are granted under the principle of least privilege and reviewed quarterly.
+
+3. Security Training & Awareness
+All employees must undergo mandatory cybersecurity training upon onboarding and annually thereafter.
+
+4. Cryptography and Key Management
+Sensitive customer data is encrypted in transit using TLS 1.3 and at rest using AES-256. Cryptographic keys are rotated every 90 days.

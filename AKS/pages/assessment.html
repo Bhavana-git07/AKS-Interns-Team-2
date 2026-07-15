@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessments — Compliance Audit Platform</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* ---- ASSESSMENT WIZARD SPECIFIC ---- */
+    .assess-layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; }
+    @media (max-width: 990px) { .assess-layout { grid-template-columns: 1fr; } }
+
+    .wizard-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+    }
+    
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; }
+
+    .step-indicator { display: flex; justify-content: space-between; margin-bottom: 24px; position: relative; }
+    .step-indicator::before {
+      content: ''; position: absolute; top: 12px; left: 10px; right: 10px; height: 2px;
+      background: var(--clr-border); z-index: 1;
+    }
+    .step-dot {
+      position: relative; z-index: 2;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--clr-surface-2); border: 2px solid var(--clr-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; color: var(--clr-muted);
+      transition: all var(--transition);
+    }
+    .step-dot.active {
+      border-color: var(--clr-accent); color: var(--clr-accent);
+      background: var(--clr-accent-dim); box-shadow: var(--shadow-glow);
+    }
+    .step-dot.completed {
+      border-color: var(--clr-accent); color: #0D1117;
+      background: var(--clr-accent);
+    }
+
+    .framework-card-select {
+      background: var(--clr-surface-2); border: 1px solid var(--clr-border);
+      border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 12px;
+      cursor: pointer; transition: all var(--transition);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .framework-card-select:hover { border-color: var(--clr-accent); }
+    .framework-card-select.selected {
+      border-color: var(--clr-accent); background: var(--clr-accent-dim);
+    }
+    .framework-card-select input[type="radio"] { accent-color: var(--clr-accent); width: 16px; height: 16px; }
+
+    /* loading log details */
+    .log-item {
+      display: flex; gap: 10px; font-size: 0.8rem; line-height: 1.5; color: var(--clr-muted);
+      padding: 4px 0; align-items: center;
+    }
+    .log-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .log-item.active { color: var(--clr-text); font-weight: 500; }
+    .log-item.completed { color: var(--clr-accent); }
+    .log-item.completed svg { color: var(--clr-accent); }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar__brand">
+      <div class="sidebar__brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18"><path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2z"/><path d="M9 12l2 2 4-4"/></svg>
+      </div>
+      <div><div class="sidebar__brand-text">ComplianceAudit</div><div class="sidebar__brand-sub">Readiness Platform</div></div>
+    </div>
+    <nav class="sidebar__nav">
+      <div class="nav-section">
+        <div class="nav-section__label">Main</div>
+        <a href="../dashboard.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <a href="companies.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Companies
+        </a>
+        <a href="users.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Users
+        </a>
+        <a href="upload-documents.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Documents
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Compliance</div>
+        <a href="assessment.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1" ry="1"/></svg>
+          Assessments
+        </a>
+        <a href="gap-analysis.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Gap Analysis
+        </a>
+        <a href="control-mapping.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Control Mapping
+        </a>
+        <a href="reports.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
+          Reports
+        </a>
+        <a href="ai-assistant.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+          AI Assistant
+        </a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section__label">Security</div>
+        <a href="audit-trail.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Audit Trail
+        </a>
+        <a href="settings.html" class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+          Settings
+        </a>
+      </div>
+    </nav>
+    <div class="sidebar__footer">
+      <div class="sidebar__user">
+        <div class="sidebar__avatar">AD</div>
+        <div class="sidebar__user-info"><div class="sidebar__user-name">Admin User</div><div class="sidebar__user-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="topbar__breadcrumb">
+        <a href="../dashboard.html" style="color:var(--clr-muted);text-decoration:none">Dashboard</a>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Assessments</span>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="section-header">
+        <div class="section-header__text">
+          <h2>Compliance Assessments</h2>
+          <p>Create mappings across frameworks to automatically identify gaps and reuse evidence</p>
+        </div>
+      </div>
+
+      <div class="assess-layout">
+        <!-- Left Pane: Active Assessments -->
+        <div>
+          <div class="card">
+            <div class="card__header">
+              <div class="card__title">Ongoing Assessments</div>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Company</th>
+                    <th>Current Framework</th>
+                    <th>Target Framework</th>
+                    <th>Overlaps Mapped</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+              <tbody>
+              <!-- Dynamically populated -->
+            </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Pane: Wizard Card -->
+        <div>
+          <div class="wizard-card">
+            <h3 style="font-family:var(--font-display);font-size:0.95rem;font-weight:600;margin-bottom:14px">New Assessment Wizard</h3>
+            
+            <div class="step-indicator">
+              <div class="step-dot active" id="dot1">1</div>
+              <div class="step-dot" id="dot2">2</div>
+              <div class="step-dot" id="dot3">3</div>
+            </div>
+
+            <!-- Step 1: Select Company -->
+            <div class="wizard-step active" id="step1">
+              <div class="form-group">
+                <label class="form-label">Target Client Company</label>
+                <p style="font-size:0.78rem;color:var(--clr-muted);margin-bottom:12px">Select the company to begin auditing.</p>
+                <select class="form-control" id="wizardCompany">
+                  <option value="">Select Company</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="nextStep(2)" style="width:100%;justify-content:center">
+                Continue to Frameworks
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+
+            <!-- Step 2: Select Source Framework -->
+            <div class="wizard-step" id="step2">
+              <div class="form-group">
+                <label class="form-label">Current Framework (Source)</label>
+                <p style="font-size:0.78rem;color:var(--clr-muted);margin-bottom:12px">Framework with existing satisfied controls and uploaded evidence.</p>
+                
+                <div class="framework-card-select selected" onclick="selectFramework('source', 'PayNet TPA', this)">
+                  <input type="radio" name="sourceFw" checked>
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">PayNet TPA</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">Third Party Assessment</div>
+                  </div>
+                </div>
+
+                <div class="framework-card-select" onclick="selectFramework('source', 'BNM RMiT', this)">
+                  <input type="radio" name="sourceFw">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">BNM RMiT</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">Risk Management in Technology</div>
+                  </div>
+                </div>
+
+                <div class="framework-card-select" onclick="selectFramework('source', 'MAS TRM', this)">
+                  <input type="radio" name="sourceFw">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">MAS TRM</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">Technology Risk Management</div>
+                  </div>
+                </div>
+
+                <div class="framework-card-select" onclick="selectFramework('source', 'NACSA NC-II', this)">
+                  <input type="radio" name="sourceFw">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">NACSA NC-II</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">National Cyber Security Agency</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-secondary" onclick="prevStep(1)" style="flex:1">Back</button>
+                <button class="btn btn-primary" onclick="nextStep(3)" style="flex:2;justify-content:center">
+                  Select Target
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 3: Select Target Framework & Run -->
+            <div class="wizard-step" id="step3">
+              <div class="form-group">
+                <label class="form-label">Target Framework</label>
+                <p style="font-size:0.78rem;color:var(--clr-muted);margin-bottom:12px">Framework you want to assess and map current evidence against.</p>
+
+                <div class="framework-card-select" onclick="selectFramework('target', 'PayNet TPA', this)">
+                  <input type="radio" name="targetFw">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">PayNet TPA</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">Third Party Assessment</div>
+                  </div>
+                </div>
+
+                <div class="framework-card-select selected" onclick="selectFramework('target', 'BNM RMiT', this)">
+                  <input type="radio" name="targetFw" checked>
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">BNM RMiT</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">Risk Management in Technology</div>
+                  </div>
+                </div>
+
+                <div class="framework-card-select" onclick="selectFramework('target', 'MAS TRM', this)">
+                  <input type="radio" name="targetFw">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">MAS TRM</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">Technology Risk Management</div>
+                  </div>
+                </div>
+
+                <div class="framework-card-select" onclick="selectFramework('target', 'NACSA NC-II', this)">
+                  <input type="radio" name="targetFw">
+                  <div>
+                    <div style="font-size:0.85rem;font-weight:600">NACSA NC-II</div>
+                    <div style="font-size:0.7rem;color:var(--clr-muted)">National Cyber Security Agency</div>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-secondary" onclick="prevStep(2)" style="flex:1">Back</button>
+                <button class="btn btn-primary" onclick="runMappingEngine()" style="flex:2;justify-content:center">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Run Mapping Engine
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTO MAPPING LOADER MODAL -->
+<div class="modal-overlay" id="loadingModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal__header">
+      <div class="modal__title">Automated Mapping Engine</div>
+    </div>
+    <div class="modal__body" style="text-align:center;padding:32px 24px">
+      <!-- spinner -->
+      <div style="display:inline-block;width:48px;height:48px;border:3px solid var(--clr-border);border-top-color:var(--clr-accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:20px"></div>
+      <h4 id="loadingHeader" style="font-family:var(--font-display);font-size:1rem;font-weight:600;margin-bottom:14px">Analyzing Controls...</h4>
+      
+      <!-- progress bar -->
+      <div class="progress-bar-container" style="height:4px;background:var(--clr-border);border-radius:2px;overflow:hidden;margin-bottom:20px">
+        <div class="progress-bar-fill" id="mappingBarFill" style="height:100%;width:0%;background:var(--clr-accent);transition:width 0.1s linear"></div>
+      </div>
+
+      <!-- console logs -->
+      <div style="background:var(--clr-bg);border:1px solid var(--clr-border);border-radius:var(--radius-sm);padding:12px;text-align:left;height:140px;overflow-y:auto" id="loadingConsole">
+        <div class="log-item active" id="log1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Extracting control requirements for target framework...
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+
+<div class="toast-container"></div>
+<script src="../js/app.js"></script>
+<script>
+  const fwNameMap = {
+    1: 'PayNet TPA',
+    2: 'BNM RMiT',
+    3: 'MAS TRM',
+    4: 'NACSA NC-II'
+  };
+  const fwIdMap = {
+    'PayNet TPA': 1,
+    'BNM RMiT': 2,
+    'MAS TRM': 3,
+    'NACSA NC-II': 4
+  };
+
+  let selectedCompanyId = '';
+  let selectedCompanyName = '';
+  let selectedSourceFw = 'PayNet TPA';
+  let selectedTargetFw = 'BNM RMiT';
+  let companiesList = [];
+  let assessmentsList = [];
+
+  function loadCompanies() {
+    fetch('../backend/api/company_list.php')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          companiesList = res.data;
+          
+          const select = document.getElementById('wizardCompany');
+          select.innerHTML = '<option value="">Select Company</option>';
+          companiesList.forEach(c => {
+            select.innerHTML += `<option value="${c.company_id}">${escapeHtml(c.company_name)}</option>`;
+          });
+
+          loadAssessments();
+        }
+      });
+  }
+
+  function loadAssessments() {
+    fetch('../backend/api/assessment_list.php')
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          assessmentsList = res.data;
+          renderAssessments();
+        }
+      });
+  }
+
+  function renderAssessments() {
+    const tbody = document.querySelector('.data-table tbody');
+    tbody.innerHTML = '';
+
+    if (assessmentsList.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--clr-muted);padding:20px;">No assessments run yet. Use the wizard to start one.</td></tr>';
+      return;
+    }
+
+    assessmentsList.forEach(a => {
+      const currentName = fwNameMap[a.current_framework_id] || 'Unknown';
+      const targetName = fwNameMap[a.target_framework_id] || 'Unknown';
+
+      const pct = Math.round(a.compliance_percentage || 0);
+      const badgeColor = pct >= 80 ? 'green' : (pct >= 50 ? 'blue' : 'warn');
+      const statusText = pct >= 80 ? 'Completed' : 'In Progress';
+      const statusBadge = pct >= 80 ? 'green' : 'blue';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${escapeHtml(a.company_name)}</strong></td>
+        <td><span class="badge badge-blue">${escapeHtml(currentName)}</span></td>
+        <td><span class="badge badge-green">${escapeHtml(targetName)}</span></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="progress-bar-track" style="width:80px"><div class="progress-bar progress-bar--${badgeColor}" style="width:${pct}%"></div></div>
+            <span style="font-size:0.75rem;font-weight:600">${pct}%</span>
+          </div>
+        </td>
+        <td><span class="badge badge-${statusBadge} badge-dot">${statusText}</span></td>
+        <td><a href="audit-checklist.html?company_id=${a.company_id}&assessment_id=${a.assessment_id}" class="btn btn-secondary btn-sm">View Checklist</a></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.querySelectorAll('.progress-bar').forEach(b => {
+      const w = b.style.width; b.style.width = '0';
+      requestAnimationFrame(() => setTimeout(() => b.style.width = w, 80));
+    });
+  }
+
+  function selectFramework(type, name, card) {
+    const radio = card.querySelector('input[type="radio"]');
+    radio.checked = true;
+
+    card.parentNode.querySelectorAll('.framework-card-select').forEach(el => el.classList.remove('selected'));
+    card.classList.add('selected');
+
+    if (type === 'source') {
+      selectedSourceFw = name;
+    } else {
+      selectedTargetFw = name;
+    }
+  }
+
+  function nextStep(step) {
+    if (step === 2) {
+      const compId = document.getElementById('wizardCompany').value;
+      if (!compId) {
+        document.getElementById('wizardCompany').classList.add('error');
+        showToast('Please select a company to continue.', 'error');
+        return;
+      }
+      document.getElementById('wizardCompany').classList.remove('error');
+      selectedCompanyId = compId;
+      selectedCompanyName = companiesList.find(c => c.company_id == compId).company_name;
+
+      document.getElementById('dot1').classList.add('completed');
+      document.getElementById('dot2').classList.add('active');
+    }
+
+    if (step === 3) {
+      if (selectedSourceFw === selectedTargetFw) {
+        showToast('Source and Target frameworks must be different.', 'error');
+        return;
+      }
+      document.getElementById('dot2').classList.add('completed');
+      document.getElementById('dot3').classList.add('active');
+    }
+
+    document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + step).classList.add('active');
+  }
+
+  function prevStep(step) {
+    if (step === 1) {
+      document.getElementById('dot1').classList.remove('completed');
+      document.getElementById('dot2').classList.remove('active');
+    }
+    if (step === 2) {
+      document.getElementById('dot2').classList.remove('completed');
+      document.getElementById('dot3').classList.remove('active');
+    }
+    document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + step).classList.add('active');
+  }
+
+  function runMappingEngine() {
+    const payload = {
+      company_id: parseInt(selectedCompanyId),
+      current_framework_id: fwIdMap[selectedSourceFw],
+      target_framework_id: fwIdMap[selectedTargetFw]
+    };
+
+    fetch('../backend/api/create_assessment.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        const assessmentId = res.assessment_id;
+        startMappingProcess(assessmentId);
+      } else {
+        showToast(res.message || 'Failed to create assessment.', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('Connection error.', 'error');
+    });
+  }
+
+  function startMappingProcess(assessmentId) {
+    openModal('loadingModal');
+    const bar = document.getElementById('mappingBarFill');
+    const header = document.getElementById('loadingHeader');
+    const consoleBox = document.getElementById('loadingConsole');
+
+    const checkIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>`;
+    const spinIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 4;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+      }
+      bar.style.width = progress + '%';
+    }, 120);
+
+    setTimeout(() => {
+      document.getElementById('log1').className = 'log-item completed';
+      document.getElementById('log1').querySelector('svg').outerHTML = checkIcon;
+      consoleBox.innerHTML += `
+        <div class="log-item active" id="log2">
+          ${spinIcon}
+          Running DB overlap mapping queries...
+        </div>
+      `;
+      header.textContent = 'Running Mapping Engine...';
+
+      fetch(`../backend/api/run_mapping.php?assessment_id=${assessmentId}`)
+        .then(r => r.json())
+        .then(mapRes => {
+          setTimeout(() => {
+            document.getElementById('log2').className = 'log-item completed';
+            document.getElementById('log2').querySelector('svg').outerHTML = checkIcon;
+            consoleBox.innerHTML += `
+              <div class="log-item active" id="log3">
+                ${spinIcon}
+                Reusing evidence documents & calculating compliance...
+              </div>
+            `;
+            header.textContent = 'Compliance: ' + Math.round(mapRes.compliance_percentage) + '%';
+            
+            setTimeout(() => {
+              document.getElementById('log3').className = 'log-item completed';
+              document.getElementById('log3').querySelector('svg').outerHTML = checkIcon;
+              header.textContent = 'Completed!';
+              showToast('Automated mapping completed successfully!', 'success');
+              
+              setTimeout(() => {
+                closeModal('loadingModal');
+                window.location.href = `audit-checklist.html?company_id=${selectedCompanyId}&assessment_id=${assessmentId}`;
+              }, 800);
+            }, 1000);
+
+          }, 1000);
+        });
+
+    }, 1200);
+  }
+
+  window.addEventListener('load', loadCompanies);
+</script>
+</body>
+</html>

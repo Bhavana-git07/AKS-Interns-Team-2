@@ -1,0 +1,7 @@
+.DS_Store
+.git_backup
+__MACOSX/
+AKS/.git_backup/
+AKS/backend/uploads/*
+!AKS/backend/uploads/.gitkeep
+AKS/backend/.env
